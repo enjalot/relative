@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo } from 'react'
+import { useRef, useEffect, useMemo, useState } from 'react'
 import * as d3 from 'd3'
 
 /**
@@ -6,7 +6,8 @@ import * as d3 from 'd3'
  *
  * Renders a grid of emojis representing the output quantity.
  * Uses D3 for layout calculation and SVG text elements for emojis.
- * The grid fills the available width and grows vertically (scrollable).
+ * The grid fills the available width and grows vertically.
+ * Cell size adapts to screen width for mobile.
  */
 
 interface EmojiGridProps {
@@ -16,37 +17,52 @@ interface EmojiGridProps {
   formulaKey: string
 }
 
-/** Size of each emoji cell in pixels */
-const CELL_SIZE = 36
 /** Padding between cells */
 const CELL_PAD = 4
-/** Total cell pitch */
-const PITCH = CELL_SIZE + CELL_PAD
+
+function getCellSize(containerWidth: number): number {
+  if (containerWidth <= 380) return 24
+  if (containerWidth <= 600) return 28
+  return 36
+}
 
 export function EmojiGrid({ emoji, count, formulaKey }: EmojiGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
+  const [containerWidth, setContainerWidth] = useState(800)
+
+  // Track container width for responsive cell sizing
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const updateWidth = () => setContainerWidth(container.clientWidth)
+    updateWidth()
+
+    const ro = new ResizeObserver(updateWidth)
+    ro.observe(container)
+    return () => ro.disconnect()
+  }, [])
+
+  const cellSize = getCellSize(containerWidth)
+  const pitch = cellSize + CELL_PAD
 
   // Compute grid dimensions
   const layout = useMemo(() => {
-    // Assume a reasonable width; will be adjusted on mount
-    const width = 800
-    const cols = Math.max(1, Math.floor(width / PITCH))
+    const cols = Math.max(1, Math.floor(containerWidth / pitch))
     const rows = Math.ceil(count / cols)
-    const height = rows * PITCH + CELL_PAD
+    const height = rows * pitch + CELL_PAD
+    const width = cols * pitch + CELL_PAD
     return { cols, rows, height, width }
-  }, [count])
+  }, [count, containerWidth, pitch])
 
   useEffect(() => {
-    const container = containerRef.current
     const svg = svgRef.current
-    if (!container || !svg) return
+    if (!svg) return
 
-    const containerWidth = container.clientWidth
-    const cols = Math.max(1, Math.floor(containerWidth / PITCH))
-    const rows = Math.ceil(count / cols)
-    const svgHeight = rows * PITCH + CELL_PAD
-    const svgWidth = cols * PITCH + CELL_PAD
+    const cols = layout.cols
+    const svgHeight = layout.height
+    const svgWidth = layout.width
 
     const svgSel = d3.select(svg)
       .attr('width', svgWidth)
@@ -56,8 +72,8 @@ export function EmojiGrid({ emoji, count, formulaKey }: EmojiGridProps) {
     // Generate data array for D3
     const data = d3.range(count).map(i => ({
       i,
-      x: (i % cols) * PITCH + PITCH / 2,
-      y: Math.floor(i / cols) * PITCH + PITCH / 2,
+      x: (i % cols) * pitch + pitch / 2,
+      y: Math.floor(i / cols) * pitch + pitch / 2,
     }))
 
     // Bind data
@@ -71,7 +87,7 @@ export function EmojiGrid({ emoji, count, formulaKey }: EmojiGridProps) {
       .attr('y', d => d.y)
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
-      .attr('font-size', `${CELL_SIZE * 0.75}px`)
+      .attr('font-size', `${cellSize * 0.75}px`)
       .text(emoji)
       .attr('opacity', 0)
       .transition()
@@ -83,12 +99,13 @@ export function EmojiGrid({ emoji, count, formulaKey }: EmojiGridProps) {
     texts
       .attr('x', d => d.x)
       .attr('y', d => d.y)
+      .attr('font-size', `${cellSize * 0.75}px`)
       .text(emoji)
 
     // Exit
     texts.exit().remove()
 
-  }, [emoji, count, formulaKey])
+  }, [emoji, count, formulaKey, layout, pitch, cellSize])
 
   return (
     <div className="emoji-grid" ref={containerRef}>

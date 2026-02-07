@@ -1,38 +1,31 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { InputPanel } from './components/InputPanel'
 import { OutputSelector } from './components/OutputSelector'
 import { FormulaDisplay } from './components/FormulaDisplay'
 import { EmojiGrid } from './components/EmojiGrid'
 import { buildFormula } from './engine/converter'
+import { useUrlState } from './hooks/useUrlState'
 import './App.css'
 
 /**
  * Main application component.
  *
- * State:
- * - inputValue / inputUnitId: what the user typed
- * - targetEntryId / targetConversionId: optional output selection
- *
+ * State is synced to/from URL search params so users can share links.
  * The formula is recomputed on every state change.
  */
 function App() {
-  const [inputValue, setInputValue] = useState<number>(1)
-  const [inputUnitId, setInputUnitId] = useState<string>('GW')
-  const [targetEntryId, setTargetEntryId] = useState<string | undefined>()
-  const [targetConversionId, setTargetConversionId] = useState<string | undefined>()
-  const [factorOverrides, setFactorOverrides] = useState<Record<string, number>>({})
-
-  const handleFactorChange = (ruleId: string, newFactor: number | undefined) => {
-    setFactorOverrides(prev => {
-      const next = { ...prev }
-      if (newFactor === undefined) {
-        delete next[ruleId]
-      } else {
-        next[ruleId] = newFactor
-      }
-      return next
-    })
-  }
+  const {
+    inputValue,
+    setInputValue,
+    inputUnitId,
+    setInputUnitId,
+    targetEntryId,
+    setTargetEntryId,
+    targetConversionId,
+    setTargetConversionId,
+    factorOverrides,
+    handleFactorChange,
+  } = useUrlState({ inputValue: 1, inputUnitId: 'GW' })
 
   const formula = useMemo(
     () => buildFormula(inputValue, inputUnitId, targetEntryId, targetConversionId, factorOverrides),
