@@ -12,6 +12,7 @@ import type { ConversionRule } from '../types'
  * - distance: meters (m)
  * - time: seconds (s)
  * - mass: kilograms (kg)
+ * - money: US dollars ($)
  *
  * To add a conversion: define the factor that converts 1 base unit of
  * fromDimension into base units of toDimension.
@@ -72,6 +73,18 @@ export const conversionRules: ConversionRule[] = [
     // 15 kWh per kg = 15,000 Wh per kg → 1 Wh = 1/15000 kg
     factor: 1 / 15000,
     description: 'Producing aluminum requires ~15 kWh per kg. So 1 Wh produces ~0.067 g of aluminum.',
+    bidirectional: true,
+  },
+
+  // === Energy → Money (electricity cost) ===
+  {
+    id: 'energy-to-money-electricity',
+    name: 'US electricity cost',
+    fromDimension: 'energy',
+    toDimension: 'money',
+    // Average US residential electricity rate: ~$0.16/kWh = $0.00016/Wh
+    factor: 0.16 / 1000, // $0.00016 per Wh
+    description: 'Average US residential electricity costs ~$0.16 per kWh.',
     bidirectional: true,
   },
 ]

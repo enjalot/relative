@@ -46,8 +46,9 @@ interface Candidate {
 
 /**
  * Find all candidate quantities reachable from the input dimension.
+ * @param factorOverrides - Optional map of conversion rule ID → overridden factor
  */
-function findCandidates(inputBaseValue: number, inputDimension: string): Candidate[] {
+function findCandidates(inputBaseValue: number, inputDimension: string, factorOverrides?: Record<string, number>): Candidate[] {
   const candidates: Candidate[] = []
 
   // Direct: same dimension
@@ -66,25 +67,26 @@ function findCandidates(inputBaseValue: number, inputDimension: string): Candida
 
   // 1-hop: via conversion rules
   for (const rule of conversionRules) {
+    const factor = factorOverrides?.[rule.id] ?? rule.factor
     let convertedValue: number | null = null
     let targetDimension: string | null = null
     let step: ConversionStep
 
     if (rule.fromDimension === inputDimension) {
-      convertedValue = inputBaseValue * rule.factor
+      convertedValue = inputBaseValue * factor
       targetDimension = rule.toDimension
       step = {
         rule,
         intermediateValue: convertedValue,
-        description: `${rule.name}: × ${rule.factor}`,
+        description: `${rule.name}: × ${factor}`,
       }
     } else if (rule.bidirectional && rule.toDimension === inputDimension) {
-      convertedValue = inputBaseValue / rule.factor
+      convertedValue = inputBaseValue / factor
       targetDimension = rule.fromDimension
       step = {
         rule,
         intermediateValue: convertedValue,
-        description: `${rule.name} (reverse): ÷ ${rule.factor}`,
+        description: `${rule.name} (reverse): ÷ ${factor}`,
       }
     } else {
       continue
@@ -211,13 +213,14 @@ export function buildFormula(
   inputUnitId: string,
   targetEntryId?: string,
   targetConversionId?: string,
+  factorOverrides?: Record<string, number>,
 ): FormulaResult | null {
   const inputUnit = getUnit(inputUnitId)
   const inputBaseValue = inputNumber * inputUnit.toBase
 
   if (inputBaseValue <= 0) return null
 
-  const candidates = findCandidates(inputBaseValue, inputUnit.dimension)
+  const candidates = findCandidates(inputBaseValue, inputUnit.dimension, factorOverrides)
 
   let chosen: Candidate | null = null
 

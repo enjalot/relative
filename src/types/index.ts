@@ -17,6 +17,7 @@ export type Dimension =
   | 'compute'    // FLOPS (floating point operations per second)
   | 'mass'       // kilograms
   | 'time'       // seconds
+  | 'money'      // US dollars
 
 /**
  * A unit of measurement. All units within a dimension share a base unit,
@@ -30,6 +31,7 @@ export type Dimension =
  * - compute: FLOPS
  * - mass: kilograms (kg)
  * - time: seconds (s)
+ * - money: US dollars ($)
  */
 export interface Unit {
   id: string

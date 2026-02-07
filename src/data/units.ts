@@ -38,6 +38,13 @@ export const units: Unit[] = [
   { id: 'g',   name: 'grams',     symbol: 'g',   dimension: 'mass', toBase: 0.001 },
   { id: 'kg',  name: 'kilograms', symbol: 'kg',  dimension: 'mass', toBase: 1 },
   { id: 'ton', name: 'metric tons', symbol: 't', dimension: 'mass', toBase: 1_000 },
+
+  // === MONEY (base: US dollars) ===
+  { id: '¢',   name: 'cents',            symbol: '¢',   dimension: 'money', toBase: 0.01 },
+  { id: '$',   name: 'dollars',          symbol: '$',   dimension: 'money', toBase: 1 },
+  { id: 'k$',  name: 'thousand dollars', symbol: 'k$',  dimension: 'money', toBase: 1_000 },
+  { id: 'M$',  name: 'million dollars',  symbol: 'M$',  dimension: 'money', toBase: 1_000_000 },
+  { id: 'B$',  name: 'billion dollars',  symbol: 'B$',  dimension: 'money', toBase: 1_000_000_000 },
 ]
 
 /** Lookup a unit by ID. Throws if not found. */

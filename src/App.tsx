@@ -20,10 +20,23 @@ function App() {
   const [inputUnitId, setInputUnitId] = useState<string>('GW')
   const [targetEntryId, setTargetEntryId] = useState<string | undefined>()
   const [targetConversionId, setTargetConversionId] = useState<string | undefined>()
+  const [factorOverrides, setFactorOverrides] = useState<Record<string, number>>({})
+
+  const handleFactorChange = (ruleId: string, newFactor: number | undefined) => {
+    setFactorOverrides(prev => {
+      const next = { ...prev }
+      if (newFactor === undefined) {
+        delete next[ruleId]
+      } else {
+        next[ruleId] = newFactor
+      }
+      return next
+    })
+  }
 
   const formula = useMemo(
-    () => buildFormula(inputValue, inputUnitId, targetEntryId, targetConversionId),
-    [inputValue, inputUnitId, targetEntryId, targetConversionId],
+    () => buildFormula(inputValue, inputUnitId, targetEntryId, targetConversionId, factorOverrides),
+    [inputValue, inputUnitId, targetEntryId, targetConversionId, factorOverrides],
   )
 
   const formulaKey = formula
@@ -62,7 +75,11 @@ function App() {
 
         {formula ? (
           <div className="visualization">
-            <FormulaDisplay formula={formula} />
+            <FormulaDisplay
+              formula={formula}
+              factorOverrides={factorOverrides}
+              onFactorChange={handleFactorChange}
+            />
             <EmojiGrid
               emoji={formula.outputEntry.emoji}
               count={formula.emojiCount}
