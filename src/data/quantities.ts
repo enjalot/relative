@@ -501,6 +501,184 @@ export const quantities: QuantityEntry[] = [
     description: 'Average Earth-Moon distance is 384,400 km.',
     category: 'distance',
   },
+
+  // ============================================================
+  // MONEY — Everyday purchases
+  // ============================================================
+  {
+    id: 'cup-of-coffee',
+    name: 'Cup of coffee',
+    emoji: '☕',
+    value: 5,
+    unitId: '$',
+    description: 'A typical coffee shop drink costs about $4–6. Using $5.',
+    category: 'money-everyday',
+  },
+  {
+    id: 'fast-food-meal',
+    name: 'Fast food meal',
+    emoji: '🍔',
+    value: 10,
+    unitId: '$',
+    description: 'A fast food combo meal costs about $8–12. Using $10.',
+    category: 'money-everyday',
+  },
+  {
+    id: 'movie-ticket',
+    name: 'Movie ticket',
+    emoji: '🎬',
+    value: 15,
+    unitId: '$',
+    description: 'An average movie ticket costs about $12–18. Using $15.',
+    category: 'money-everyday',
+  },
+  {
+    id: 'book',
+    name: 'Paperback book',
+    emoji: '📖',
+    value: 15,
+    unitId: '$',
+    description: 'A paperback book costs about $12–18. Using $15.',
+    category: 'money-everyday',
+  },
+  {
+    id: 'grocery-trip',
+    name: 'Weekly groceries',
+    emoji: '🛒',
+    value: 150,
+    unitId: '$',
+    description: 'Average US household spends about $150/week on groceries.',
+    category: 'money-everyday',
+  },
+  {
+    id: 'tank-of-gas',
+    name: 'Tank of gas',
+    emoji: '⛽',
+    value: 50,
+    unitId: '$',
+    description: 'A typical fill-up (12 gallons × ~$4/gal) costs about $50.',
+    category: 'money-everyday',
+  },
+
+  // ============================================================
+  // MONEY — Monthly/annual expenses
+  // ============================================================
+  {
+    id: 'monthly-rent',
+    name: 'Monthly rent (US avg)',
+    emoji: '🏠',
+    value: 1750,
+    unitId: '$',
+    description: 'Average US rent is about $1,700–1,800/month. Using $1,750.',
+    category: 'money-expenses',
+  },
+  {
+    id: 'monthly-electricity',
+    name: 'Monthly electricity bill',
+    emoji: '💡',
+    value: 140,
+    unitId: '$',
+    description: 'Average US monthly electricity bill is about $120–160. Using $140.',
+    category: 'money-expenses',
+  },
+  {
+    id: 'new-car',
+    name: 'New car',
+    emoji: '🚗',
+    value: 48,
+    unitId: 'k$',
+    description: 'Average new car transaction price in the US is about $48,000.',
+    category: 'money-expenses',
+  },
+
+  // ============================================================
+  // MONEY — Income and salaries
+  // ============================================================
+  {
+    id: 'us-minimum-wage-year',
+    name: 'US minimum wage (annual)',
+    emoji: '💵',
+    value: 15,
+    unitId: 'k$',
+    description: 'US federal minimum wage ($7.25/hr) yields ~$15k/year full-time. Many states are higher.',
+    category: 'money-income',
+  },
+  {
+    id: 'us-median-salary',
+    name: 'US median household income',
+    emoji: '👨‍👩‍👧‍👦',
+    value: 75,
+    unitId: 'k$',
+    description: 'US median household income is about $75,000/year (Census 2023).',
+    category: 'money-income',
+  },
+  {
+    id: 'us-median-home',
+    name: 'US median home price',
+    emoji: '🏡',
+    value: 420,
+    unitId: 'k$',
+    description: 'US median home sale price is about $420,000 (2024).',
+    category: 'money-income',
+  },
+
+  // ============================================================
+  // MONEY — Large scale
+  // ============================================================
+  {
+    id: 'startup-seed',
+    name: 'Startup seed round',
+    emoji: '🌱',
+    value: 3,
+    unitId: 'M$',
+    description: 'A typical startup seed funding round is about $2–5M. Using $3M.',
+    category: 'money-large',
+  },
+  {
+    id: 'nfl-salary-cap',
+    name: 'NFL team salary cap',
+    emoji: '🏈',
+    value: 255,
+    unitId: 'M$',
+    description: 'The NFL salary cap is about $255M per team (2024).',
+    category: 'money-large',
+  },
+  {
+    id: 'commercial-airplane',
+    name: 'Boeing 737 MAX',
+    emoji: '✈️',
+    value: 120,
+    unitId: 'M$',
+    description: 'A Boeing 737 MAX list price is about $100–140M. Using $120M.',
+    category: 'money-large',
+  },
+  {
+    id: 'aircraft-carrier',
+    name: 'Aircraft carrier',
+    emoji: '🚢',
+    value: 13,
+    unitId: 'B$',
+    description: 'A Gerald R. Ford-class aircraft carrier costs about $13 billion.',
+    category: 'money-large',
+  },
+  {
+    id: 'iss',
+    name: 'International Space Station',
+    emoji: '🛸',
+    value: 150,
+    unitId: 'B$',
+    description: 'The ISS has cost roughly $150 billion over its lifetime.',
+    category: 'money-large',
+  },
+  {
+    id: 'us-federal-budget',
+    name: 'US federal budget (annual)',
+    emoji: '🇺🇸',
+    value: 6100,
+    unitId: 'B$',
+    description: 'The US federal budget is about $6.1 trillion for FY2024.',
+    category: 'money-large',
+  },
 ]
 
 /** Lookup a quantity entry by ID */
