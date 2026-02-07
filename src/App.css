@@ -142,7 +142,60 @@
   font-size: 0.85rem;
   color: #666;
   margin-bottom: 0.5rem;
+}
+
+.formula-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.4rem 0;
+}
+
+.step-label {
   font-style: italic;
+}
+
+.step-factor {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.step-factor-label {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.step-factor-input {
+  width: 100px;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.85rem;
+  border: 1px solid #c0c0d0;
+  border-radius: 4px;
+  background: white;
+  color: #1a1a2e;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.step-factor-input:focus {
+  border-color: #6366f1;
+}
+
+.step-factor-reset {
+  background: none;
+  border: 1px solid #c0c0d0;
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #6366f1;
+  transition: background 0.2s;
+}
+
+.step-factor-reset:hover {
+  background: #eef;
 }
 
 .formula-breakdown {

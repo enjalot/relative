@@ -13,6 +13,7 @@ export type Dimension =
   | 'power'      // watts (instantaneous rate)
   | 'energy'     // watt-hours (cumulative over time)
   | 'distance'   // meters
+  | 'currency'   // US dollars
   | 'temperature'// degrees celsius (for heat conversions)
   | 'compute'    // FLOPS (floating point operations per second)
   | 'mass'       // kilograms
@@ -26,6 +27,7 @@ export type Dimension =
  * - power: watts (W)
  * - energy: watt-hours (Wh)
  * - distance: meters (m)
+ * - currency: US dollars ($)
  * - temperature: degrees celsius (°C)
  * - compute: FLOPS
  * - mass: kilograms (kg)

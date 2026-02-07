@@ -15,7 +15,7 @@ interface InputPanelProps {
 }
 
 /** Which dimensions to show in the input unit selector */
-const INPUT_DIMENSIONS: Dimension[] = ['power', 'energy']
+const INPUT_DIMENSIONS: Dimension[] = ['power', 'energy', 'currency']
 
 export function InputPanel({ value, unitId, onValueChange, onUnitChange }: InputPanelProps) {
   const groupedUnits = useMemo(() => {
@@ -31,7 +31,7 @@ export function InputPanel({ value, unitId, onValueChange, onUnitChange }: Input
 
   return (
     <div className="input-panel">
-      <label className="input-label">How much electricity?</label>
+      <label className="input-label">How much?</label>
       <div className="input-row">
         <input
           type="number"

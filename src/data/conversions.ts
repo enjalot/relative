@@ -10,6 +10,7 @@ import type { ConversionRule } from '../types'
  * - power: watts (W)
  * - energy: watt-hours (Wh)
  * - distance: meters (m)
+ * - currency: US dollars ($)
  * - time: seconds (s)
  * - mass: kilograms (kg)
  *
@@ -60,6 +61,38 @@ export const conversionRules: ConversionRule[] = [
     // 1 Wh = 1/150 km = 6.667 meters
     factor: 1000 / 150, // ≈ 6.667 meters per Wh
     description: 'A Tesla Model 3 uses about 150 Wh/km. So 1 Wh drives about 6.7 meters.',
+    bidirectional: true,
+  },
+
+  // === Energy → Currency (electricity pricing) ===
+  {
+    id: 'energy-to-currency-residential',
+    name: 'US residential electricity price',
+    fromDimension: 'energy',
+    toDimension: 'currency',
+    // US average residential: ~$0.16/kWh = $0.00016/Wh
+    factor: 0.00016,
+    description: 'US average residential electricity costs ~$0.16/kWh (EIA 2024). So 1 Wh costs $0.00016.',
+    bidirectional: true,
+  },
+  {
+    id: 'energy-to-currency-commercial',
+    name: 'US commercial electricity price',
+    fromDimension: 'energy',
+    toDimension: 'currency',
+    // US average commercial: ~$0.13/kWh = $0.00013/Wh
+    factor: 0.00013,
+    description: 'US average commercial electricity costs ~$0.13/kWh (EIA 2024). So 1 Wh costs $0.00013.',
+    bidirectional: true,
+  },
+  {
+    id: 'energy-to-currency-industrial',
+    name: 'US industrial electricity price',
+    fromDimension: 'energy',
+    toDimension: 'currency',
+    // US average industrial: ~$0.08/kWh = $0.00008/Wh
+    factor: 0.00008,
+    description: 'US average industrial electricity costs ~$0.08/kWh (EIA 2024). So 1 Wh costs $0.00008.',
     bidirectional: true,
   },
 

@@ -6,15 +6,19 @@ import { formatNumber } from '../engine/converter'
  *
  * Shows:
  * - The equation: INPUT = COUNT × OUTPUT
- * - Conversion steps (if any hops)
+ * - Conversion steps with editable factor inputs
  * - Legend: what one emoji represents
  */
 
 interface FormulaDisplayProps {
   formula: FormulaResult
+  /** Callback when user adjusts a conversion factor */
+  onFactorChange?: (ruleId: string, newFactor: number) => void
+  /** Current factor overrides (to show in inputs) */
+  factorOverrides?: Record<string, number>
 }
 
-export function FormulaDisplay({ formula }: FormulaDisplayProps) {
+export function FormulaDisplay({ formula, onFactorChange, factorOverrides }: FormulaDisplayProps) {
   const {
     inputNumber,
     inputUnit,
@@ -26,10 +30,8 @@ export function FormulaDisplay({ formula }: FormulaDisplayProps) {
     outputUnit,
   } = formula
 
-  // Format the input side
   const inputStr = `${formatNumber(inputNumber)} ${inputUnit.symbol}`
 
-  // Format the output side
   const outputCount = emojiCount * emojiScale
   const outputValueTotal = outputCount * outputEntry.value
   const bestOutputStr = `${formatNumber(outputValueTotal)} ${outputUnit.symbol}`
@@ -46,11 +48,43 @@ export function FormulaDisplay({ formula }: FormulaDisplayProps) {
 
       {steps.length > 0 && (
         <div className="formula-steps">
-          {steps.map((step, i) => (
-            <div key={i} className="formula-step">
-              via {step.rule.name}
-            </div>
-          ))}
+          {steps.map((step, i) => {
+            const ruleId = step.rule.id
+            const defaultFactor = step.rule.factor
+            const currentFactor = factorOverrides?.[ruleId] ?? defaultFactor
+            const isOverridden = factorOverrides?.[ruleId] !== undefined
+
+            return (
+              <div key={i} className="formula-step">
+                <span className="step-label">via {step.rule.name}</span>
+                <span className="step-factor">
+                  <span className="step-factor-label">factor:</span>
+                  <input
+                    type="number"
+                    className="step-factor-input"
+                    value={currentFactor}
+                    step="any"
+                    onChange={e => {
+                      const v = parseFloat(e.target.value)
+                      if (!isNaN(v) && v > 0 && onFactorChange) {
+                        onFactorChange(ruleId, v)
+                      }
+                    }}
+                    title={`Default: ${defaultFactor}\n${step.rule.description}`}
+                  />
+                  {isOverridden && (
+                    <button
+                      className="step-factor-reset"
+                      onClick={() => onFactorChange?.(ruleId, defaultFactor)}
+                      title={`Reset to default (${defaultFactor})`}
+                    >
+                      ↺
+                    </button>
+                  )}
+                </span>
+              </div>
+            )
+          })}
         </div>
       )}
 
