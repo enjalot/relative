@@ -1,11 +1,14 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { InputPanel } from './components/InputPanel'
 import { OutputSelector } from './components/OutputSelector'
 import { FormulaDisplay } from './components/FormulaDisplay'
 import { EmojiGrid } from './components/EmojiGrid'
+import { ConversionExplorer } from './components/ConversionExplorer'
 import { buildFormula } from './engine/converter'
 import { useUrlState } from './hooks/useUrlState'
 import './App.css'
+
+type Tab = 'converter' | 'explorer'
 
 /**
  * Main application component.
@@ -14,6 +17,8 @@ import './App.css'
  * The formula is recomputed on every state change.
  */
 function App() {
+  const [activeTab, setActiveTab] = useState<Tab>('converter')
+
   const {
     inputValue,
     setInputValue,
@@ -43,47 +48,68 @@ function App() {
         <p className="app-subtitle">Understand quantities by comparison</p>
       </header>
 
-      <main className="app-main">
-        <div className="controls">
-          <InputPanel
-            value={inputValue}
-            unitId={inputUnitId}
-            onValueChange={setInputValue}
-            onUnitChange={id => {
-              setInputUnitId(id)
-              setTargetEntryId(undefined)
-              setTargetConversionId(undefined)
-            }}
-          />
-          <OutputSelector
-            inputUnitId={inputUnitId}
-            selectedEntryId={targetEntryId}
-            selectedConversionId={targetConversionId}
-            onSelect={(entryId, convId) => {
-              setTargetEntryId(entryId || undefined)
-              setTargetConversionId(convId || undefined)
-            }}
-          />
-        </div>
+      <nav className="app-tabs">
+        <button
+          className={`tab-btn ${activeTab === 'converter' ? 'active' : ''}`}
+          onClick={() => setActiveTab('converter')}
+        >
+          Converter
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'explorer' ? 'active' : ''}`}
+          onClick={() => setActiveTab('explorer')}
+        >
+          Explore quantities
+        </button>
+      </nav>
 
-        {formula ? (
-          <div className="visualization">
-            <FormulaDisplay
-              formula={formula}
-              factorOverrides={factorOverrides}
-              onFactorChange={handleFactorChange}
-            />
-            <EmojiGrid
-              emoji={formula.outputEntry.emoji}
-              count={formula.emojiCount}
-              formulaKey={formulaKey}
-            />
-          </div>
-        ) : (
-          <div className="no-result">
-            <p>Enter a quantity above to see it visualized.</p>
-          </div>
+      <main className="app-main">
+        {activeTab === 'converter' && (
+          <>
+            <div className="controls">
+              <InputPanel
+                value={inputValue}
+                unitId={inputUnitId}
+                onValueChange={setInputValue}
+                onUnitChange={id => {
+                  setInputUnitId(id)
+                  setTargetEntryId(undefined)
+                  setTargetConversionId(undefined)
+                }}
+              />
+              <OutputSelector
+                inputUnitId={inputUnitId}
+                selectedEntryId={targetEntryId}
+                selectedConversionId={targetConversionId}
+                onSelect={(entryId, convId) => {
+                  setTargetEntryId(entryId || undefined)
+                  setTargetConversionId(convId || undefined)
+                }}
+              />
+            </div>
+
+            {formula ? (
+              <div className="visualization">
+                <FormulaDisplay
+                  formula={formula}
+                  factorOverrides={factorOverrides}
+                  onFactorChange={handleFactorChange}
+                />
+                <EmojiGrid
+                  emoji={formula.outputEntry.emoji}
+                  count={formula.emojiCount}
+                  formulaKey={formulaKey}
+                />
+              </div>
+            ) : (
+              <div className="no-result">
+                <p>Enter a quantity above to see it visualized.</p>
+              </div>
+            )}
+          </>
         )}
+
+        {activeTab === 'explorer' && <ConversionExplorer />}
       </main>
 
       <footer className="app-footer">

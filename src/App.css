@@ -34,6 +34,145 @@
 }
 
 /* ============================================
+   Tabs
+   ============================================ */
+
+.app-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0ea;
+}
+
+.tab-btn {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: #555;
+}
+
+.tab-btn.active {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+}
+
+/* ============================================
+   Conversion Explorer
+   ============================================ */
+
+.conversion-explorer {
+  padding: 0 0 1rem;
+}
+
+.explorer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.explorer-intro h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.3rem;
+  color: #1a1a2e;
+}
+
+.explorer-intro p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  max-width: 550px;
+  line-height: 1.5;
+}
+
+.scale-toggle {
+  display: flex;
+  border: 2px solid #d0d0dc;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.toggle-btn {
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.toggle-btn:first-child {
+  border-right: 1px solid #d0d0dc;
+}
+
+.toggle-btn.active {
+  background: #6366f1;
+  color: white;
+}
+
+.toggle-btn:hover:not(.active) {
+  background: #f0f0ff;
+}
+
+.scale-hint {
+  font-size: 0.82rem;
+  color: #888;
+  font-style: italic;
+  margin: 0 0 1.25rem;
+  line-height: 1.4;
+}
+
+.dimension-section {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: #f8f8fc;
+  border-radius: 12px;
+  border: 1px solid #e0e0ea;
+}
+
+.dimension-section h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  color: #1a1a2e;
+}
+
+.dimension-description {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.bar-chart-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bar-chart-container svg {
+  display: block;
+}
+
+.no-items {
+  color: #999;
+  font-style: italic;
+}
+
+/* ============================================
    Controls (Input + Output selector)
    ============================================ */
 
@@ -327,6 +466,34 @@
 
   .app-subtitle {
     font-size: 0.85rem;
+  }
+
+  .app-tabs {
+    margin-bottom: 1rem;
+  }
+
+  .tab-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .explorer-header {
+    flex-direction: column;
+  }
+
+  .scale-toggle {
+    align-self: stretch;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    padding: 0.6rem;
+    min-height: 44px;
+  }
+
+  .dimension-section {
+    padding: 1rem;
+    margin-bottom: 1.25rem;
   }
 
   .controls {
