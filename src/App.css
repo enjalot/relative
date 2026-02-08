@@ -387,12 +387,12 @@
 }
 
 .bar-chart-container {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
 }
 
 .bar-chart-container svg {
   display: block;
+  width: 100%;
 }
 
 .no-items {
