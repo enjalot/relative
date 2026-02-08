@@ -255,6 +255,11 @@ export function CrossoverDiagram() {
           fitViewOptions={{ padding: 0.3 }}
           minZoom={0.5}
           maxZoom={1.5}
+          panOnDrag={false}
+          panOnScroll={false}
+          zoomOnScroll={false}
+          zoomOnPinch={false}
+          zoomOnDoubleClick={false}
           proOptions={{ hideAttribution: true }}
         >
           <Background gap={20} size={1} color="#f0f0f0" />
@@ -330,8 +335,8 @@ function buildAlgorithmGraph() {
       type: 'decision',
       position: { x: 200, y: 480 },
       data: {
-        label: 'Power \u2194 Energy?',
-        detail: 'Is this the power-energy-duration rule?',
+        label: 'Duration-based?',
+        detail: 'Does the conversion rule have durationBased: true?',
       },
     },
     {
@@ -357,23 +362,12 @@ function buildAlgorithmGraph() {
       },
     },
     {
-      id: 'emoji-scale',
+      id: 'display',
       type: 'step',
       position: { x: 200, y: 720 },
       data: {
-        label: '6. Emoji Scale',
-        detail: 'If count \u2264 1000: show directly. If > 1000: find power of 10 to bring into 10\u20131000 range. Target ~200 emojis.',
-        color: '#9b59b6',
-        icon: '\uD83D\uDE00',
-      },
-    },
-    {
-      id: 'display',
-      type: 'step',
-      position: { x: 200, y: 840 },
-      data: {
-        label: '7. Display Card',
-        detail: 'Render sentence, emoji grid, and dropdown of alternatives. User can override the chosen entry.',
+        label: '6. Display Card',
+        detail: 'Render sentence and dropdown of alternatives. User can override the chosen entry.',
         color: '#1abc9c',
         icon: '\uD83C\uDFC1',
       },
@@ -389,9 +383,8 @@ function buildAlgorithmGraph() {
     { id: 'e-group-decision', source: 'group', target: 'is-duration', style: { stroke: '#e67e22', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#e67e22' } },
     { id: 'e-decision-duration', source: 'is-duration', sourceHandle: 'right', target: 'score-duration', label: 'Yes', labelStyle: { fontSize: 11, fill: '#e74c3c' }, style: { stroke: '#e74c3c', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#e74c3c' } },
     { id: 'e-decision-count', source: 'is-duration', sourceHandle: 'left', target: 'score-count', label: 'No', labelStyle: { fontSize: 11, fill: '#2ecc71' }, style: { stroke: '#2ecc71', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#2ecc71' } },
-    { id: 'e-duration-emoji', source: 'score-duration', target: 'emoji-scale', style: { stroke: '#9b59b6', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#9b59b6' } },
-    { id: 'e-count-emoji', source: 'score-count', target: 'emoji-scale', style: { stroke: '#9b59b6', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#9b59b6' } },
-    { id: 'e-emoji-display', source: 'emoji-scale', target: 'display', style: { stroke: '#1abc9c', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#1abc9c' } },
+    { id: 'e-duration-display', source: 'score-duration', target: 'display', style: { stroke: '#1abc9c', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#1abc9c' } },
+    { id: 'e-count-display', source: 'score-count', target: 'display', style: { stroke: '#1abc9c', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#1abc9c' } },
   ]
 
   return { nodes, edges }
@@ -420,6 +413,11 @@ export function AlgorithmDiagram() {
           fitViewOptions={{ padding: 0.2 }}
           minZoom={0.4}
           maxZoom={1.5}
+          panOnDrag={false}
+          panOnScroll={false}
+          zoomOnScroll={false}
+          zoomOnPinch={false}
+          zoomOnDoubleClick={false}
           proOptions={{ hideAttribution: true }}
         >
           <Background gap={20} size={1} color="#f0f0f0" />
@@ -516,22 +514,13 @@ export function About() {
         <ul className="about-rules-list">
           <li><strong>Input must be {'>'} 0.</strong> Zero or negative inputs produce no results.</li>
           <li><strong>Minimum count threshold: 0.1.</strong> If a quantity comparison yields rawCount {'<'} 0.1, it is filtered out to avoid scientific notation.</li>
-          <li><strong>Duration bounds:</strong> For power/energy conversions, durations must be between 1 minute and 100 years. Outside that range, the comparison is hidden.</li>
+          <li><strong>Duration bounds:</strong> For duration-based conversions (e.g. power/energy), durations must be between 1 minute and 100 years. Outside that range, the comparison is hidden.</li>
           <li><strong>One card per conversion path.</strong> Each rule (and "direct") produces at most one card showing the best-fit quantity, with a dropdown of alternatives.</li>
           <li><strong>"Biggest match under" selection.</strong> Among quantities where count {'\u2265'} 1, the algorithm picks the largest (closest to 1 emoji). This gives "1.1 small cities" rather than "1,000 households."</li>
           <li><strong>User overrides.</strong> If you select a different quantity from the dropdown, that choice is preserved until you change units.</li>
         </ul>
       </section>
 
-      <section className="about-section">
-        <h3>Emoji Scaling</h3>
-        <p>The emoji grid aims for 10&ndash;1000 emojis (ideally around 200). When rawCount exceeds 1000:</p>
-        <ol className="about-rules-list">
-          <li>Find the power of 10 to bring it into range: <code>scale = 10^(floor(log10(count)) - 2)</code></li>
-          <li>Divide count by scale. Each emoji now represents <code>scale</code> of the quantity.</li>
-          <li>A label shows what each emoji represents (e.g. "1 emoji = 100 households").</li>
-        </ol>
-      </section>
 
       <section className="about-section">
         <h3>Contributing New Content</h3>
