@@ -791,6 +791,206 @@ export const quantities: QuantityEntry[] = [
     description: 'The US federal budget is about $6.1 trillion for FY2024.',
     category: 'money-large',
   },
+
+  // ============================================================
+  // TIME — Very short durations
+  // ============================================================
+  {
+    id: 'camera-shutter',
+    name: 'Camera shutter (bright day)',
+    emoji: '📸',
+    value: 0.001,
+    unitId: 's',
+    description: 'A fast camera shutter speed in bright light is about 1/1000 second (1 ms).',
+    category: 'time-short',
+  },
+  {
+    id: 'blink-of-eye',
+    name: 'Blink of an eye',
+    emoji: '👁️',
+    value: 0.3,
+    unitId: 's',
+    description: 'A human eye blink lasts about 0.1–0.4 seconds. Using 0.3 s.',
+    category: 'time-short',
+  },
+  {
+    id: 'deep-breath',
+    name: 'Deep breath',
+    emoji: '🌬️',
+    value: 5,
+    unitId: 's',
+    description: 'A slow, deep breath in and out takes about 4–6 seconds. Using 5 s.',
+    category: 'time-short',
+  },
+
+  // ============================================================
+  // TIME — Minutes to hours
+  // ============================================================
+  {
+    id: 'microwave-popcorn',
+    name: 'Microwave popcorn',
+    emoji: '🍿',
+    value: 3,
+    unitId: 'min',
+    description: 'A bag of microwave popcorn takes about 2–4 minutes. Using 3 min.',
+    category: 'time-medium',
+  },
+  {
+    id: 'pop-song',
+    name: 'Pop song',
+    emoji: '🎵',
+    value: 3.5,
+    unitId: 'min',
+    description: 'An average pop song is about 3–4 minutes long. Using 3.5 min.',
+    category: 'time-medium',
+  },
+  {
+    id: 'tv-episode',
+    name: 'TV episode (drama)',
+    emoji: '📺',
+    value: 45,
+    unitId: 'min',
+    description: 'A typical TV drama episode runs about 42–50 minutes. Using 45 min.',
+    category: 'time-medium',
+  },
+  {
+    id: 'feature-film',
+    name: 'Feature film',
+    emoji: '🎬',
+    value: 2,
+    unitId: 'hr',
+    description: 'The average feature film is about 90–150 minutes. Using 2 hours.',
+    category: 'time-medium',
+  },
+  {
+    id: 'full-night-sleep',
+    name: 'Full night\'s sleep',
+    emoji: '😴',
+    value: 8,
+    unitId: 'hr',
+    description: 'Recommended adult sleep is 7–9 hours per night. Using 8 hours.',
+    category: 'time-medium',
+  },
+
+  // ============================================================
+  // TIME — Days to weeks
+  // ============================================================
+  {
+    id: 'weekend',
+    name: 'Weekend',
+    emoji: '🏖️',
+    value: 2,
+    unitId: 'day',
+    description: 'A standard weekend is 2 days (Saturday and Sunday).',
+    category: 'time-days',
+  },
+  {
+    id: 'work-week',
+    name: 'Work week',
+    emoji: '💼',
+    value: 5,
+    unitId: 'day',
+    description: 'A standard work week is 5 days (Monday–Friday).',
+    category: 'time-days',
+  },
+  {
+    id: 'lunar-month',
+    name: 'Lunar month',
+    emoji: '🌙',
+    value: 29.5,
+    unitId: 'day',
+    description: 'The synodic lunar month (new moon to new moon) is about 29.5 days.',
+    category: 'time-days',
+  },
+
+  // ============================================================
+  // TIME — Months to years
+  // ============================================================
+  {
+    id: 'school-semester',
+    name: 'School semester',
+    emoji: '🎓',
+    value: 120,
+    unitId: 'day',
+    description: 'A typical school semester is about 4 months (~120 days).',
+    category: 'time-long',
+  },
+  {
+    id: 'human-pregnancy',
+    name: 'Human pregnancy',
+    emoji: '🤰',
+    value: 280,
+    unitId: 'day',
+    description: 'A full-term human pregnancy is about 40 weeks (~280 days).',
+    category: 'time-long',
+  },
+  {
+    id: 'earth-orbit',
+    name: 'Earth orbit (1 year)',
+    emoji: '🌍',
+    value: 1,
+    unitId: 'yr',
+    description: 'Earth takes 1 year (365.25 days) to orbit the Sun.',
+    category: 'time-long',
+  },
+  {
+    id: 'dog-lifetime',
+    name: 'Dog lifetime',
+    emoji: '🐕',
+    value: 12,
+    unitId: 'yr',
+    description: 'The average dog lifespan is about 10–13 years. Using 12 years.',
+    category: 'time-long',
+  },
+  {
+    id: 'human-lifetime',
+    name: 'Human lifetime',
+    emoji: '🧓',
+    value: 79,
+    unitId: 'yr',
+    description: 'Average global human life expectancy is about 73 years; US is ~79 years. Using 79 years.',
+    category: 'time-long',
+  },
+
+  // ============================================================
+  // TIME — Very long durations
+  // ============================================================
+  {
+    id: 'great-pyramid-age',
+    name: 'Age of the Great Pyramid',
+    emoji: '🏛️',
+    value: 4500,
+    unitId: 'yr',
+    description: 'The Great Pyramid of Giza was built around 2560 BC, roughly 4,500 years ago.',
+    category: 'time-very-long',
+  },
+  {
+    id: 'ice-age-last',
+    name: 'Last Ice Age peak',
+    emoji: '🧊',
+    value: 20000,
+    unitId: 'yr',
+    description: 'The Last Glacial Maximum was about 20,000 years ago.',
+    category: 'time-very-long',
+  },
+  {
+    id: 'dinosaur-extinction',
+    name: 'Dinosaur extinction',
+    emoji: '🦕',
+    value: 66000000,
+    unitId: 'yr',
+    description: 'Non-avian dinosaurs went extinct about 66 million years ago.',
+    category: 'time-very-long',
+  },
+  {
+    id: 'age-of-earth',
+    name: 'Age of the Earth',
+    emoji: '🌏',
+    value: 4540000000,
+    unitId: 'yr',
+    description: 'The Earth formed approximately 4.54 billion years ago.',
+    category: 'time-very-long',
+  },
 ]
 
 /** Lookup a quantity entry by ID */

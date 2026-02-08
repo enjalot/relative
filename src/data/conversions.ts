@@ -31,6 +31,7 @@ export const conversionRules: ConversionRule[] = [
     factor: 1, // 1 watt for 1 hour = 1 watt-hour (base relation)
     description: 'Energy = Power × Time. Duration is computed per appliance.',
     bidirectional: true,
+    durationBased: true,
   },
 
   // === Energy → Distance (via EV efficiency) ===

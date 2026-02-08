@@ -17,7 +17,6 @@ src/
     InputPanel.tsx       — Number input + unit combobox
     OutputSelector.tsx   — Output quantity selector (grouped by conversion path)
     FormulaDisplay.tsx   — Shows equation, conversion steps, and legend
-    EmojiGrid.tsx        — D3/SVG scrollable emoji grid visualization
   App.tsx               — Main app wiring state and components together
 ```
 

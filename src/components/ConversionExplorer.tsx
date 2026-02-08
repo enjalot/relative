@@ -28,10 +28,15 @@ const dimensionMeta: Record<string, { label: string; baseUnit: string; descripti
     baseUnit: '$',
     description: 'Dollar amounts from everyday purchases to national budgets. Spans over 12 orders of magnitude.',
   },
+  time: {
+    label: 'Time',
+    baseUnit: 's',
+    description: 'Durations from a camera shutter click to the age of the Earth. Measured in seconds (s), spanning over 17 orders of magnitude.',
+  },
 }
 
 /** Which dimensions to show, in order */
-const dimensionOrder: Dimension[] = ['power', 'energy', 'distance', 'money']
+const dimensionOrder: Dimension[] = ['power', 'energy', 'distance', 'money', 'time']
 
 /** Get all quantities for a dimension, sorted by base value ascending */
 function getQuantitiesForDimension(dim: string): (QuantityEntry & { baseValue: number })[] {

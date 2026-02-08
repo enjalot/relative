@@ -77,6 +77,17 @@ export interface ConversionRule {
   description: string
   /** Is this conversion bidirectional? (most are) */
   bidirectional: boolean
+  /**
+   * When true, the conversion produces a meaningful duration:
+   * one dimension is a rate and the other is cumulative,
+   * so candidates are scored by how "readable" the implied duration is
+   * rather than by raw count. The display shows "running for X hours"
+   * style sentences.
+   *
+   * The rate dimension's base unit and the cumulative dimension's base unit
+   * must relate via: cumulative = rate × time (in hours).
+   */
+  durationBased?: boolean
 }
 
 /**

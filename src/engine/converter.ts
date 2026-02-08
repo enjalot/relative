@@ -301,7 +301,7 @@ export function buildAllConversions(
 
   for (const convId of sortedKeys) {
     const group = groups.get(convId)!
-    const isDurationBased = convId === 'power-energy-duration'
+    const isDurationBased = group.candidates[0]?.steps[0]?.rule.durationBased === true
 
     // Check if user has overridden the entry for this conversion
     const overrideEntryId = entryOverrides?.[convId]
