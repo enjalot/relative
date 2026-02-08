@@ -48,15 +48,19 @@ function getQuantitiesForDimension(dim: string): (QuantityEntry & { baseValue: n
     .sort((a, b) => a.baseValue - b.baseValue)
 }
 
-/** Format a number for display on the axis */
+/** Format a number: no decimals if whole, otherwise 1 decimal. Unit touches number. */
+function formatNum(n: number): string {
+  return Number.isInteger(n) ? n.toString() : n.toFixed(1)
+}
+
 function formatValue(v: number, unitSymbol: string): string {
-  if (v >= 1e12) return `${(v / 1e12).toFixed(1)}T ${unitSymbol}`
-  if (v >= 1e9) return `${(v / 1e9).toFixed(1)}G ${unitSymbol}`
-  if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M ${unitSymbol}`
-  if (v >= 1e3) return `${(v / 1e3).toFixed(1)}k ${unitSymbol}`
-  if (v >= 1) return `${v.toFixed(1)} ${unitSymbol}`
-  if (v >= 0.001) return `${(v * 1000).toFixed(1)}m ${unitSymbol}`
-  return `${v.toExponential(1)} ${unitSymbol}`
+  if (v >= 1e12) return `${formatNum(v / 1e12)}T${unitSymbol}`
+  if (v >= 1e9) return `${formatNum(v / 1e9)}G${unitSymbol}`
+  if (v >= 1e6) return `${formatNum(v / 1e6)}M${unitSymbol}`
+  if (v >= 1e3) return `${formatNum(v / 1e3)}k${unitSymbol}`
+  if (v >= 1) return `${formatNum(v)}${unitSymbol}`
+  if (v >= 0.001) return `${formatNum(v * 1000)}m${unitSymbol}`
+  return `${v.toExponential(1)}${unitSymbol}`
 }
 
 interface BarChartProps {
@@ -69,43 +73,57 @@ function BarChart({ items, baseUnitSymbol, scaleType }: BarChartProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const margin = { top: 20, right: 20, bottom: 80, left: 10 }
+  const emojiCol = 28
+  const barLeft = 36
+  const barHeight = 18
+  const rowHeight = 38
+  const margin = { top: 4, right: 60, bottom: 4, left: 0 }
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current || items.length === 0) return
 
     const containerWidth = containerRef.current.clientWidth
-    const width = containerWidth - margin.left - margin.right
-    const barWidth = Math.max(30, Math.min(60, width / items.length - 4))
-    const chartWidth = Math.max(width, items.length * (barWidth + 4))
-    const height = 260 - margin.top - margin.bottom
+    const chartWidth = containerWidth - margin.left - margin.right - barLeft
+    const totalHeight = items.length * rowHeight
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
     svg
-      .attr('width', chartWidth + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
+      .attr('width', containerWidth)
+      .attr('height', totalHeight + margin.top + margin.bottom)
 
     const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
 
-    // X scale: categorical (one bar per item)
-    const x = d3.scaleBand()
+    // Y scale: categorical (one row per item)
+    const y = d3.scaleBand()
       .domain(items.map(d => d.id))
-      .range([0, chartWidth])
+      .range([0, totalHeight])
       .padding(0.15)
 
-    // Y scale
+    // X scale: bar length
     const minVal = d3.min(items, d => d.baseValue) || 1
     const maxVal = d3.max(items, d => d.baseValue) || 1
 
-    const y = scaleType === 'log'
+    const x = scaleType === 'log'
       ? d3.scaleLog()
           .domain([minVal * 0.5, maxVal * 2])
-          .range([height, 0])
+          .range([0, chartWidth])
           .clamp(true)
       : d3.scaleLinear()
           .domain([0, maxVal * 1.1])
-          .range([height, 0])
+          .range([0, chartWidth])
+
+    // Emoji to the left
+    g.selectAll('.emoji-label')
+      .data(items)
+      .enter()
+      .append('text')
+      .attr('x', emojiCol / 2)
+      .attr('y', d => y(d.id)! + y.bandwidth() / 2 + 1)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .attr('font-size', '14px')
+      .text(d => d.emoji)
 
     // Bars
     g.selectAll('.bar')
@@ -113,53 +131,39 @@ function BarChart({ items, baseUnitSymbol, scaleType }: BarChartProps) {
       .enter()
       .append('rect')
       .attr('class', 'bar')
-      .attr('x', d => x(d.id)!)
-      .attr('width', x.bandwidth())
-      .attr('y', d => y(d.baseValue))
-      .attr('height', d => height - y(d.baseValue))
+      .attr('x', barLeft)
+      .attr('y', d => y(d.id)! + (y.bandwidth() - barHeight) / 2)
+      .attr('width', d => Math.max(2, x(d.baseValue)))
+      .attr('height', barHeight)
       .attr('rx', 3)
       .attr('fill', '#6366f1')
       .attr('opacity', 0.8)
 
-    // Value labels above bars
+    // Value labels at end of bars
     g.selectAll('.bar-label')
       .data(items)
       .enter()
       .append('text')
       .attr('class', 'bar-label')
-      .attr('x', d => x(d.id)! + x.bandwidth() / 2)
-      .attr('y', d => y(d.baseValue) - 4)
-      .attr('text-anchor', 'middle')
+      .attr('x', d => barLeft + Math.max(2, x(d.baseValue)) + 5)
+      .attr('y', d => y(d.id)! + (y.bandwidth() - barHeight) / 2 + barHeight / 2)
+      .attr('dominant-baseline', 'central')
       .attr('font-size', '9px')
       .attr('fill', '#666')
       .text(d => formatValue(d.baseValue, baseUnitSymbol))
 
-    // Emoji labels on x-axis
-    g.selectAll('.emoji-label')
-      .data(items)
-      .enter()
-      .append('text')
-      .attr('x', d => x(d.id)! + x.bandwidth() / 2)
-      .attr('y', height + 22)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '18px')
-      .text(d => d.emoji)
-
-    // Name labels below emoji (rotated for readability)
+    // Name labels below bars (small, unobtrusive)
     g.selectAll('.name-label')
       .data(items)
       .enter()
       .append('text')
-      .attr('transform', d => {
-        const xPos = x(d.id)! + x.bandwidth() / 2
-        return `translate(${xPos},${height + 40}) rotate(35)`
-      })
-      .attr('text-anchor', 'start')
-      .attr('font-size', '10px')
-      .attr('fill', '#888')
-      .text(d => d.name.length > 18 ? d.name.slice(0, 16) + '...' : d.name)
+      .attr('x', barLeft)
+      .attr('y', d => y(d.id)! + (y.bandwidth() - barHeight) / 2 + barHeight + 9)
+      .attr('font-size', '8px')
+      .attr('fill', '#aaa')
+      .text(d => d.name.length > 30 ? d.name.slice(0, 28) + '…' : d.name)
 
-  }, [items, scaleType, baseUnitSymbol, margin.top, margin.right, margin.bottom, margin.left])
+  }, [items, scaleType, baseUnitSymbol])
 
   return (
     <div ref={containerRef} className="bar-chart-container">
