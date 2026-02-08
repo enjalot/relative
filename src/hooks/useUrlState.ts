@@ -1,22 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-/**
- * Reads initial state from URL search params.
- * Returns decoded values (or undefined if not present).
- */
 function readUrlState() {
   const params = new URLSearchParams(window.location.search)
   const v = params.get('v')
   const u = params.get('u')
-  const e = params.get('e')
-  const c = params.get('c')
   const f = params.get('f')
 
   return {
     inputValue: v !== null ? parseFloat(v) : undefined,
     inputUnitId: u ?? undefined,
-    targetEntryId: e ?? undefined,
-    targetConversionId: c ?? undefined,
     factorOverrides: f ? parseFactorOverrides(f) : undefined,
   }
 }
@@ -42,25 +34,16 @@ function encodeFactorOverrides(overrides: Record<string, number>): string {
 interface UrlState {
   inputValue: number
   inputUnitId: string
-  targetEntryId: string | undefined
-  targetConversionId: string | undefined
   factorOverrides: Record<string, number>
 }
 
-/**
- * Hook that syncs app state to/from URL search params.
- * Reads initial state from URL on mount, writes state changes to URL.
- */
 export function useUrlState(defaults: { inputValue: number; inputUnitId: string }) {
   const initial = readUrlState()
 
   const [inputValue, setInputValue] = useState<number>(initial.inputValue ?? defaults.inputValue)
   const [inputUnitId, setInputUnitId] = useState<string>(initial.inputUnitId ?? defaults.inputUnitId)
-  const [targetEntryId, setTargetEntryId] = useState<string | undefined>(initial.targetEntryId)
-  const [targetConversionId, setTargetConversionId] = useState<string | undefined>(initial.targetConversionId)
   const [factorOverrides, setFactorOverrides] = useState<Record<string, number>>(initial.factorOverrides ?? {})
 
-  // Debounced URL update to avoid thrashing during rapid input
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const syncToUrl = useCallback((state: UrlState) => {
@@ -69,8 +52,6 @@ export function useUrlState(defaults: { inputValue: number; inputUnitId: string 
       const params = new URLSearchParams()
       params.set('v', String(state.inputValue))
       params.set('u', state.inputUnitId)
-      if (state.targetEntryId) params.set('e', state.targetEntryId)
-      if (state.targetConversionId) params.set('c', state.targetConversionId)
       const fStr = encodeFactorOverrides(state.factorOverrides)
       if (fStr) params.set('f', fStr)
 
@@ -79,10 +60,9 @@ export function useUrlState(defaults: { inputValue: number; inputUnitId: string 
     }, 300)
   }, [])
 
-  // Sync to URL whenever state changes
   useEffect(() => {
-    syncToUrl({ inputValue, inputUnitId, targetEntryId, targetConversionId, factorOverrides })
-  }, [inputValue, inputUnitId, targetEntryId, targetConversionId, factorOverrides, syncToUrl])
+    syncToUrl({ inputValue, inputUnitId, factorOverrides })
+  }, [inputValue, inputUnitId, factorOverrides, syncToUrl])
 
   const handleFactorChange = useCallback((ruleId: string, newFactor: number | undefined) => {
     setFactorOverrides(prev => {
@@ -101,10 +81,6 @@ export function useUrlState(defaults: { inputValue: number; inputUnitId: string 
     setInputValue,
     inputUnitId,
     setInputUnitId,
-    targetEntryId,
-    setTargetEntryId,
-    targetConversionId,
-    setTargetConversionId,
     factorOverrides,
     handleFactorChange,
   }
