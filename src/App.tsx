@@ -1,21 +1,13 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { InputPanel } from './components/InputPanel'
-import { OutputSelector } from './components/OutputSelector'
-import { FormulaDisplay } from './components/FormulaDisplay'
-import { EmojiGrid } from './components/EmojiGrid'
+import { ConversionCards } from './components/ConversionCards'
 import { ConversionExplorer } from './components/ConversionExplorer'
-import { buildFormula } from './engine/converter'
+import { buildAllConversions } from './engine/converter'
 import { useUrlState } from './hooks/useUrlState'
 import './App.css'
 
 type Tab = 'converter' | 'explorer'
 
-/**
- * Main application component.
- *
- * State is synced to/from URL search params so users can share links.
- * The formula is recomputed on every state change.
- */
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('converter')
 
@@ -24,27 +16,26 @@ function App() {
     setInputValue,
     inputUnitId,
     setInputUnitId,
-    targetEntryId,
-    setTargetEntryId,
-    targetConversionId,
-    setTargetConversionId,
     factorOverrides,
     handleFactorChange,
   } = useUrlState({ inputValue: 1, inputUnitId: 'GW' })
 
-  const formula = useMemo(
-    () => buildFormula(inputValue, inputUnitId, targetEntryId, targetConversionId, factorOverrides),
-    [inputValue, inputUnitId, targetEntryId, targetConversionId, factorOverrides],
-  )
+  // Track per-conversion entry overrides (conversionId -> entryId)
+  const [entryOverrides, setEntryOverrides] = useState<Record<string, string>>({})
 
-  const formulaKey = formula
-    ? `${formula.outputEntry.id}-${formula.emojiCount}-${formula.emojiScale}`
-    : 'none'
+  const handleEntryChange = useCallback((conversionId: string, entryId: string) => {
+    setEntryOverrides(prev => ({ ...prev, [conversionId]: entryId }))
+  }, [])
+
+  const sentences = useMemo(
+    () => buildAllConversions(inputValue, inputUnitId, factorOverrides, entryOverrides),
+    [inputValue, inputUnitId, factorOverrides, entryOverrides],
+  )
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>&#9889; Relative</h1>
+        <h1>Relative</h1>
         <p className="app-subtitle">Understand quantities by comparison</p>
       </header>
 
@@ -73,37 +64,24 @@ function App() {
                 onValueChange={setInputValue}
                 onUnitChange={id => {
                   setInputUnitId(id)
-                  setTargetEntryId(undefined)
-                  setTargetConversionId(undefined)
-                }}
-              />
-              <OutputSelector
-                inputUnitId={inputUnitId}
-                selectedEntryId={targetEntryId}
-                selectedConversionId={targetConversionId}
-                onSelect={(entryId, convId) => {
-                  setTargetEntryId(entryId || undefined)
-                  setTargetConversionId(convId || undefined)
+                  setEntryOverrides({})
                 }}
               />
             </div>
 
-            {formula ? (
-              <div className="visualization">
-                <FormulaDisplay
-                  formula={formula}
-                  factorOverrides={factorOverrides}
-                  onFactorChange={handleFactorChange}
-                />
-                <EmojiGrid
-                  emoji={formula.outputEntry.emoji}
-                  count={formula.emojiCount}
-                  formulaKey={formulaKey}
-                />
-              </div>
+            {sentences.length > 0 ? (
+              <ConversionCards
+                sentences={sentences}
+                inputNumber={inputValue}
+                inputUnitId={inputUnitId}
+                onInputNumberChange={setInputValue}
+                onEntryChange={handleEntryChange}
+                factorOverrides={factorOverrides}
+                onFactorChange={handleFactorChange}
+              />
             ) : (
               <div className="no-result">
-                <p>Enter a quantity above to see it visualized.</p>
+                <p>Enter a quantity above to see comparisons.</p>
               </div>
             )}
           </>

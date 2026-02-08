@@ -1,13 +1,14 @@
 /* ============================================
-   App Layout
+   App Layout — minimal, editorial feel
    ============================================ */
 
 .app {
-  max-width: 900px;
+  max-width: 640px;
   margin: 0 auto;
-  padding: 1rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #1a1a2e;
+  padding: 2rem 1rem;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  color: #222;
+  line-height: 1.6;
 }
 
 /* ============================================
@@ -15,22 +16,24 @@
    ============================================ */
 
 .app-header {
-  text-align: center;
   margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e8e8f0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #ddd;
 }
 
 .app-header h1 {
-  font-size: 2rem;
+  font-size: 1.5rem;
   margin: 0;
-  color: #1a1a2e;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #111;
 }
 
 .app-subtitle {
-  margin: 0.25rem 0 0;
-  color: #666;
-  font-size: 1rem;
+  margin: 0.15rem 0 0;
+  color: #888;
+  font-size: 0.9rem;
+  font-style: italic;
 }
 
 /* ============================================
@@ -41,20 +44,22 @@
   display: flex;
   gap: 0;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e0e0ea;
+  border-bottom: 1px solid #ddd;
 }
 
 .tab-btn {
-  padding: 0.6rem 1.25rem;
-  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: none;
   border: none;
-  border-bottom: 3px solid transparent;
-  color: #888;
+  border-bottom: 2px solid transparent;
+  color: #999;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
-  margin-bottom: -2px;
+  margin-bottom: -1px;
+  letter-spacing: 0.02em;
 }
 
 .tab-btn:hover {
@@ -62,8 +67,231 @@
 }
 
 .tab-btn.active {
-  color: #6366f1;
-  border-bottom-color: #6366f1;
+  color: #222;
+  border-bottom-color: #222;
+}
+
+/* ============================================
+   Controls (Input panel)
+   ============================================ */
+
+.controls {
+  margin-bottom: 1.5rem;
+}
+
+.input-panel {
+  width: 100%;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #888;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input-number {
+  flex: 1;
+  padding: 0.5rem 0.6rem;
+  font-size: 1.1rem;
+  font-family: 'Georgia', serif;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  background: transparent;
+  color: #222;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+  border-radius: 0;
+}
+
+.input-number:focus {
+  border-bottom-color: #222;
+}
+
+.input-unit {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  background: transparent;
+  color: #222;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 1.5rem;
+}
+
+.input-unit:focus {
+  border-bottom-color: #222;
+}
+
+/* ============================================
+   Conversion Cards
+   ============================================ */
+
+.conversion-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.conversion-card {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.conversion-card:first-child {
+  padding-top: 0;
+}
+
+.conversion-card:last-child {
+  border-bottom: none;
+}
+
+.card-dimension-tag {
+  font-size: 0.7rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #aaa;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+}
+
+.card-sentence {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  margin: 0;
+  color: #222;
+}
+
+.card-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-step {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0.3rem 0 0;
+  font-style: italic;
+}
+
+.card-reset {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  padding: 0 0.25rem;
+  margin-left: 0.25rem;
+}
+
+.card-reset:hover {
+  color: #222;
+}
+
+/* ============================================
+   Tangle-style interactive numbers
+   ============================================ */
+
+.tangle-number {
+  cursor: pointer;
+  border-bottom: 1.5px dotted #999;
+  padding-bottom: 1px;
+  transition: border-color 0.15s, color 0.15s;
+  color: #222;
+}
+
+.tangle-number:hover {
+  border-bottom-color: #222;
+  color: #000;
+}
+
+.tangle-input-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2em;
+}
+
+.tangle-input {
+  font-family: 'Georgia', serif;
+  font-size: inherit;
+  color: #222;
+  border: none;
+  border-bottom: 1.5px solid #222;
+  background: transparent;
+  outline: none;
+  width: 5em;
+  padding: 0 0 1px 0;
+  margin: 0;
+  border-radius: 0;
+}
+
+.tangle-suffix {
+  color: #888;
+  font-size: 0.85em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================
+   Inline select (subtle, blends with text)
+   ============================================ */
+
+.inline-select-wrap {
+  display: inline;
+  position: relative;
+}
+
+.inline-select {
+  font-family: 'Georgia', serif;
+  font-size: inherit;
+  color: #222;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dotted #bbb;
+  border-radius: 0;
+  padding: 0 1.2em 1px 0;
+  margin: 0;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23bbb'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  transition: border-color 0.15s;
+  line-height: inherit;
+}
+
+.inline-select:hover {
+  border-bottom-color: #666;
+}
+
+.inline-select:focus {
+  border-bottom-color: #222;
+  border-bottom-style: solid;
 }
 
 /* ============================================
@@ -86,7 +314,7 @@
 .explorer-intro h2 {
   margin: 0 0 0.25rem;
   font-size: 1.3rem;
-  color: #1a1a2e;
+  color: #222;
 }
 
 .explorer-intro p {
@@ -99,34 +327,34 @@
 
 .scale-toggle {
   display: flex;
-  border: 2px solid #d0d0dc;
-  border-radius: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   overflow: hidden;
   flex-shrink: 0;
 }
 
 .toggle-btn {
-  padding: 0.45rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   border: none;
   background: white;
-  color: #666;
+  color: #888;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
 
 .toggle-btn:first-child {
-  border-right: 1px solid #d0d0dc;
+  border-right: 1px solid #ddd;
 }
 
 .toggle-btn.active {
-  background: #6366f1;
+  background: #222;
   color: white;
 }
 
 .toggle-btn:hover:not(.active) {
-  background: #f0f0ff;
+  background: #f5f5f5;
 }
 
 .scale-hint {
@@ -138,17 +366,17 @@
 }
 
 .dimension-section {
-  margin-bottom: 2rem;
-  padding: 1.25rem;
-  background: #f8f8fc;
-  border-radius: 12px;
-  border: 1px solid #e0e0ea;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fafafa;
+  border-radius: 4px;
+  border: 1px solid #eee;
 }
 
 .dimension-section h3 {
   margin: 0 0 0.25rem;
-  font-size: 1.1rem;
-  color: #1a1a2e;
+  font-size: 1rem;
+  color: #222;
 }
 
 .dimension-description {
@@ -173,237 +401,6 @@
 }
 
 /* ============================================
-   Controls (Input + Output selector)
-   ============================================ */
-
-.controls {
-  display: flex;
-  gap: 1.5rem;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: #f8f8fc;
-  border-radius: 12px;
-  border: 1px solid #e0e0ea;
-}
-
-.input-panel,
-.output-selector {
-  flex: 1;
-  min-width: 250px;
-}
-
-.input-label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.input-row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.input-number {
-  flex: 1;
-  padding: 0.6rem 0.8rem;
-  font-size: 1.2rem;
-  border: 2px solid #d0d0dc;
-  border-radius: 8px;
-  background: white;
-  color: #1a1a2e;
-  outline: none;
-  transition: border-color 0.2s;
-  min-width: 0;
-}
-
-.input-number:focus {
-  border-color: #6366f1;
-}
-
-.input-unit {
-  padding: 0.6rem 0.8rem;
-  font-size: 0.95rem;
-  border: 2px solid #d0d0dc;
-  border-radius: 8px;
-  background: white;
-  color: #1a1a2e;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.2s;
-  max-width: 100%;
-}
-
-.input-unit:focus {
-  border-color: #6366f1;
-}
-
-/* ============================================
-   Formula Display
-   ============================================ */
-
-.formula-display {
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #f0f0ff 0%, #e8f4f8 100%);
-  border-radius: 12px;
-  border: 1px solid #d0d0ea;
-  margin-bottom: 1.5rem;
-}
-
-.formula-equation {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-.formula-input {
-  color: #6366f1;
-}
-
-.formula-equals {
-  color: #999;
-}
-
-.formula-output {
-  color: #059669;
-}
-
-.formula-steps {
-  font-size: 0.85rem;
-  color: #666;
-  margin-bottom: 0.5rem;
-}
-
-.formula-step {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  padding: 0.4rem 0;
-}
-
-.step-label {
-  font-style: italic;
-}
-
-.step-factor-editor {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #d0d0dc;
-}
-
-.factor-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #555;
-  font-style: normal;
-}
-
-.factor-input {
-  width: 5rem;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.85rem;
-  border: 1px solid #c0c0d0;
-  border-radius: 4px;
-  background: white;
-  color: #1a1a2e;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.factor-input:focus {
-  border-color: #6366f1;
-}
-
-.factor-unit {
-  font-size: 0.8rem;
-  color: #777;
-  font-style: normal;
-}
-
-.factor-reset {
-  background: none;
-  border: 1px solid #c0c0d0;
-  border-radius: 4px;
-  padding: 0.1rem 0.4rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  color: #6366f1;
-  transition: background 0.2s;
-}
-
-.factor-reset:hover {
-  background: #f0f0ff;
-}
-
-.formula-breakdown {
-  font-size: 1.1rem;
-  color: #444;
-  margin-bottom: 1rem;
-}
-
-.formula-legend {
-  padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.legend-emoji {
-  font-size: 1.5rem;
-}
-
-.legend-text {
-  font-size: 0.9rem;
-  color: #444;
-}
-
-.legend-count {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.formula-description {
-  font-size: 0.8rem;
-  color: #888;
-}
-
-/* ============================================
-   Emoji Grid
-   ============================================ */
-
-.emoji-grid {
-  width: 100%;
-  overflow-x: hidden;
-  padding: 0.5rem 0;
-}
-
-.emoji-svg {
-  display: block;
-  margin: 0 auto;
-}
-
-/* ============================================
    Empty state
    ============================================ */
 
@@ -411,7 +408,7 @@
   text-align: center;
   padding: 3rem;
   color: #999;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 /* ============================================
@@ -421,10 +418,11 @@
 .app-footer {
   text-align: center;
   margin-top: 3rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e8e8f0;
-  font-size: 0.8rem;
-  color: #999;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+  font-size: 0.75rem;
+  color: #bbb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ============================================
@@ -436,13 +434,8 @@
     margin-bottom: 1.5rem;
   }
 
-  .controls {
-    gap: 1.25rem;
-    padding: 1.25rem;
-  }
-
-  .formula-equation {
-    font-size: 1.15rem;
+  .card-sentence {
+    font-size: 1.1rem;
   }
 }
 
@@ -452,20 +445,20 @@
 
 @media (max-width: 600px) {
   .app {
-    padding: 0.75rem;
+    padding: 1rem 0.75rem;
   }
 
   .app-header {
     margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
   }
 
   .app-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
   .app-subtitle {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .app-tabs {
@@ -473,8 +466,8 @@
   }
 
   .tab-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
   }
 
   .explorer-header {
@@ -487,24 +480,20 @@
 
   .toggle-btn {
     flex: 1;
-    padding: 0.6rem;
+    padding: 0.5rem;
     min-height: 44px;
   }
 
   .dimension-section {
-    padding: 1rem;
-    margin-bottom: 1.25rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
   }
 
   .controls {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
-  .input-panel,
-  .output-selector {
+  .input-panel {
     min-width: 0;
     width: 100%;
   }
@@ -513,88 +502,32 @@
     flex-direction: column;
   }
 
-  /* Touch-friendly input targets (min 44px) */
   .input-number {
-    padding: 0.75rem;
+    padding: 0.6rem 0.4rem;
     font-size: 1rem;
   }
 
   .input-unit {
-    padding: 0.75rem;
-    font-size: 1rem;
+    padding: 0.6rem 0.4rem;
+    font-size: 0.9rem;
     width: 100%;
   }
 
-  /* Full-width select in output selector on mobile */
-  .output-selector .input-unit {
-    width: 100%;
+  .card-sentence {
+    font-size: 1.05rem;
   }
 
-  .formula-display {
-    padding: 1rem;
-    margin-bottom: 1rem;
+  .conversion-card {
+    padding: 1rem 0;
   }
 
-  .formula-equation {
-    font-size: 1rem;
-    gap: 0.4rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .formula-steps {
-    font-size: 0.8rem;
-  }
-
-  .formula-step {
-    gap: 0.5rem;
-  }
-
-  .step-factor-editor {
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    padding: 0.4rem;
-    width: 100%;
-  }
-
-  .factor-input {
-    padding: 0.4rem;
-    font-size: 0.85rem;
-    min-height: 44px;
-  }
-
-  .factor-reset {
-    padding: 0.3rem 0.6rem;
-    min-height: 44px;
-    min-width: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .formula-breakdown {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .formula-legend {
-    padding: 0.6rem 0.75rem;
-  }
-
-  .legend-emoji {
-    font-size: 1.25rem;
-  }
-
-  .legend-text {
-    font-size: 0.85rem;
-  }
-
-  .legend-count {
-    font-size: 0.8rem;
+  .tangle-input {
+    width: 4em;
   }
 
   .no-result {
     padding: 2rem 1rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .app-footer {
@@ -608,18 +541,10 @@
 
 @media (max-width: 380px) {
   .app {
-    padding: 0.5rem;
+    padding: 0.75rem 0.5rem;
   }
 
-  .controls {
-    padding: 0.75rem;
-  }
-
-  .formula-display {
-    padding: 0.75rem;
-  }
-
-  .formula-equation {
-    font-size: 0.9rem;
+  .card-sentence {
+    font-size: 0.95rem;
   }
 }

@@ -158,6 +158,164 @@ function scoreCandidate(rawCount: number): number {
 }
 
 /**
+ * Pick the best candidate using "biggest match under" algorithm.
+ * Finds the largest quantity whose base value is <= the converted value,
+ * yielding a count >= 1 (e.g. "1.1 small cities" rather than "0.001 large cities").
+ */
+function pickBestUnder(candidates: Candidate[]): Candidate | null {
+  // Filter to candidates with rawCount >= 1 (the entry fits inside the value)
+  const fitting = candidates.filter(c => c.rawCount >= 1)
+  if (fitting.length === 0) {
+    // Nothing fits — pick the one closest to 1 from above
+    let best: Candidate | null = null
+    let bestCount = Infinity
+    for (const c of candidates) {
+      if (c.rawCount > 0 && c.rawCount < bestCount) {
+        bestCount = c.rawCount
+        best = c
+      }
+    }
+    return best
+  }
+
+  // Among fitting candidates, pick the one with count closest to 1 (i.e. largest entry value)
+  // This gives us "1.1 small cities" instead of "1,000 households"
+  let best: Candidate | null = null
+  let bestCount = Infinity
+  for (const c of fitting) {
+    if (c.rawCount < bestCount) {
+      bestCount = c.rawCount
+      best = c
+    }
+  }
+  return best
+}
+
+/**
+ * A single conversion sentence result.
+ */
+export interface ConversionSentence {
+  /** The conversion path identifier (e.g. 'direct', or a conversion rule id) */
+  conversionId: string
+  /** Human-readable name for this conversion type */
+  conversionName: string
+  /** The dimension of the output */
+  outputDimension: string
+  /** The chosen output entry */
+  outputEntry: QuantityEntry
+  /** How many of the output entry equals the input */
+  count: number
+  /** The output unit */
+  outputUnit: Unit
+  /** Conversion steps taken */
+  steps: ConversionStep[]
+  /** All candidate entries for this conversion path (for the dropdown) */
+  alternatives: Array<{ entry: QuantityEntry; count: number }>
+  /** The converted base value in the output dimension */
+  outputBaseValue: number
+}
+
+/**
+ * Build one conversion sentence per conversion type.
+ * Uses the "biggest match under" algorithm for selection.
+ */
+export function buildAllConversions(
+  inputNumber: number,
+  inputUnitId: string,
+  factorOverrides?: Record<string, number>,
+  /** Optional map of conversionId -> selected entryId overrides */
+  entryOverrides?: Record<string, string>,
+): ConversionSentence[] {
+  const inputUnit = getUnit(inputUnitId)
+  const inputBaseValue = inputNumber * inputUnit.toBase
+
+  if (inputBaseValue <= 0) return []
+
+  const candidates = findCandidates(inputBaseValue, inputUnit.dimension, factorOverrides)
+
+  // Group candidates by conversion path
+  const groups = new Map<string, { name: string; dimension: string; steps: ConversionStep[]; candidates: Candidate[] }>()
+
+  for (const c of candidates) {
+    const convId = c.steps.length === 0 ? 'direct' : c.steps[0].rule.id
+    const convName = c.steps.length === 0 ? getDimensionLabel(inputUnit.dimension) : c.steps[0].rule.name
+    const dim = getDimension(c.entry)
+
+    if (!groups.has(convId)) {
+      groups.set(convId, { name: convName, dimension: dim, steps: c.steps, candidates: [] })
+    }
+    groups.get(convId)!.candidates.push(c)
+  }
+
+  const sentences: ConversionSentence[] = []
+
+  // Put 'direct' first
+  const sortedKeys = Array.from(groups.keys()).sort((a, b) => {
+    if (a === 'direct') return -1
+    if (b === 'direct') return 1
+    return 0
+  })
+
+  for (const convId of sortedKeys) {
+    const group = groups.get(convId)!
+
+    // Check if user has overridden the entry for this conversion
+    const overrideEntryId = entryOverrides?.[convId]
+    let chosen: Candidate | null = null
+
+    if (overrideEntryId) {
+      chosen = group.candidates.find(c => c.entry.id === overrideEntryId) || null
+    }
+
+    if (!chosen) {
+      chosen = pickBestUnder(group.candidates)
+    }
+
+    if (!chosen) continue
+
+    const outputUnit = getUnit(chosen.entry.unitId)
+
+    // Build alternatives list with counts, sorted by value descending
+    const alternatives = group.candidates
+      .map(c => ({ entry: c.entry, count: c.rawCount }))
+      .sort((a, b) => {
+        const aBase = toBaseValue(a.entry)
+        const bBase = toBaseValue(b.entry)
+        return bBase - aBase
+      })
+
+    sentences.push({
+      conversionId: convId,
+      conversionName: group.name,
+      outputDimension: group.dimension,
+      outputEntry: chosen.entry,
+      count: chosen.rawCount,
+      outputUnit,
+      steps: chosen.steps,
+      alternatives,
+      outputBaseValue: chosen.outputBaseValue,
+    })
+  }
+
+  return sentences
+}
+
+/** Get a human-friendly label for a dimension */
+function getDimensionLabel(dim: string): string {
+  const labels: Record<string, string> = {
+    power: 'Power',
+    energy: 'Energy',
+    distance: 'Distance',
+    mass: 'Mass',
+    money: 'Money',
+    time: 'Time',
+    temperature: 'Temperature',
+    compute: 'Compute',
+  }
+  return labels[dim] || dim
+}
+
+/**
  * Format the emoji label: what one emoji represents.
  * e.g., "1 🏠 = 1.2 kW" or "1 🗺️ = 4,500 km (1 cross-country US trip)"
  */
