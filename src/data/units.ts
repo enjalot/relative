@@ -32,6 +32,7 @@ export const units: Unit[] = [
   { id: 'min', name: 'minutes', symbol: 'min', dimension: 'time', toBase: 60 },
   { id: 'hr',  name: 'hours',   symbol: 'hr',  dimension: 'time', toBase: 3_600 },
   { id: 'day', name: 'days',    symbol: 'day', dimension: 'time', toBase: 86_400 },
+  { id: 'mo',  name: 'months',  symbol: 'mo',  dimension: 'time', toBase: 2_629_800 }, // 1/12 of a Julian year
   { id: 'yr',  name: 'years',   symbol: 'yr',  dimension: 'time', toBase: 31_557_600 },
 
   // === MASS (base: kilograms) ===

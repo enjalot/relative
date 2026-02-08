@@ -100,39 +100,12 @@ function AlgorithmStepNode({ data }: { data: { label: string; detail: string; co
   )
 }
 
-function DecisionNode({ data }: { data: { label: string; detail: string } }) {
-  return (
-    <div
-      style={{
-        padding: '10px 14px',
-        borderRadius: 8,
-        border: '2px solid #e67e22',
-        background: '#e67e2211',
-        minWidth: 180,
-        maxWidth: 220,
-        textAlign: 'center',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        transform: 'rotate(0deg)',
-      }}
-    >
-      <Handle type="target" position={Position.Top} style={{ background: '#e67e22' }} />
-      <Handle type="source" position={Position.Bottom} style={{ background: '#e67e22' }} />
-      <Handle type="source" position={Position.Right} id="right" style={{ background: '#e67e22' }} />
-      <Handle type="source" position={Position.Left} id="left" style={{ background: '#e67e22' }} />
-      <div style={{ fontSize: 18, marginBottom: 2 }}>{'\u2753'}</div>
-      <div style={{ fontWeight: 700, fontSize: 13, color: '#e67e22' }}>{data.label}</div>
-      <div style={{ fontSize: 11, color: '#555', marginTop: 3, lineHeight: 1.4 }}>{data.detail}</div>
-    </div>
-  )
-}
-
 const dimensionNodeTypes: NodeTypes = {
   dimension: DimensionNode,
 }
 
 const algorithmNodeTypes: NodeTypes = {
   step: AlgorithmStepNode,
-  decision: DecisionNode,
 }
 
 /* ============================================
@@ -331,32 +304,12 @@ function buildAlgorithmGraph() {
       },
     },
     {
-      id: 'is-duration',
-      type: 'decision',
+      id: 'pick-best',
+      type: 'step',
       position: { x: 200, y: 480 },
       data: {
-        label: 'Duration-based?',
-        detail: 'Does the conversion rule have durationBased: true?',
-      },
-    },
-    {
-      id: 'score-duration',
-      type: 'step',
-      position: { x: 420, y: 590 },
-      data: {
-        label: '5a. Score Duration',
-        detail: 'Prefer durations near 10 hrs. Filter: 1 min \u2013 100 yrs. Score = 5 - |log\u2081\u2080(hrs) - 1| \u00D7 1.5',
-        color: '#e74c3c',
-        icon: '\u23F1\uFE0F',
-      },
-    },
-    {
-      id: 'score-count',
-      type: 'step',
-      position: { x: -10, y: 590 },
-      data: {
-        label: '5b. Score Count',
-        detail: 'Filter rawCount \u2265 0.1. Use "biggest match under" \u2014 pick largest entry fitting inside the input (count \u2265 1).',
+        label: '5. Pick Best Match',
+        detail: 'For each group, pick the entry giving the closest round number. Uses "biggest match under" \u2014 the largest entry fitting inside the input (count \u2265 1).',
         color: '#2ecc71',
         icon: '\uD83C\uDFC6',
       },
@@ -364,10 +317,10 @@ function buildAlgorithmGraph() {
     {
       id: 'display',
       type: 'step',
-      position: { x: 200, y: 720 },
+      position: { x: 200, y: 610 },
       data: {
         label: '6. Display Card',
-        detail: 'Render sentence and dropdown of alternatives. User can override the chosen entry.',
+        detail: 'Render sentence and dropdown of alternatives. Dropdowns show entry native values. User can override the chosen entry.',
         color: '#1abc9c',
         icon: '\uD83C\uDFC1',
       },
@@ -380,11 +333,8 @@ function buildAlgorithmGraph() {
     { id: 'e-base-hop', source: 'to-base', target: 'find-hop', style: { stroke: '#8e44ad', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#8e44ad' } },
     { id: 'e-direct-group', source: 'find-direct', target: 'group', style: { stroke: '#e67e22', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#e67e22' } },
     { id: 'e-hop-group', source: 'find-hop', target: 'group', style: { stroke: '#e67e22', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#e67e22' } },
-    { id: 'e-group-decision', source: 'group', target: 'is-duration', style: { stroke: '#e67e22', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#e67e22' } },
-    { id: 'e-decision-duration', source: 'is-duration', sourceHandle: 'right', target: 'score-duration', label: 'Yes', labelStyle: { fontSize: 11, fill: '#e74c3c' }, style: { stroke: '#e74c3c', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#e74c3c' } },
-    { id: 'e-decision-count', source: 'is-duration', sourceHandle: 'left', target: 'score-count', label: 'No', labelStyle: { fontSize: 11, fill: '#2ecc71' }, style: { stroke: '#2ecc71', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#2ecc71' } },
-    { id: 'e-duration-display', source: 'score-duration', target: 'display', style: { stroke: '#1abc9c', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#1abc9c' } },
-    { id: 'e-count-display', source: 'score-count', target: 'display', style: { stroke: '#1abc9c', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#1abc9c' } },
+    { id: 'e-group-pick', source: 'group', target: 'pick-best', style: { stroke: '#2ecc71', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#2ecc71' } },
+    { id: 'e-pick-display', source: 'pick-best', target: 'display', style: { stroke: '#1abc9c', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#1abc9c' } },
   ]
 
   return { nodes, edges }
@@ -403,7 +353,7 @@ export function AlgorithmDiagram() {
         finds all reachable quantities, scores them for visual clarity, and picks the best match
         for each conversion path.
       </p>
-      <div style={{ height: 700, border: '1px solid #eee', borderRadius: 6, overflow: 'hidden' }}>
+      <div style={{ height: 580, border: '1px solid #eee', borderRadius: 6, overflow: 'hidden' }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -513,10 +463,10 @@ export function About() {
         <h3>Display Rules: When Conversions Are Shown or Hidden</h3>
         <ul className="about-rules-list">
           <li><strong>Input must be {'>'} 0.</strong> Zero or negative inputs produce no results.</li>
-          <li><strong>Minimum count threshold: 0.1.</strong> If a quantity comparison yields rawCount {'<'} 0.1, it is filtered out to avoid scientific notation.</li>
-          <li><strong>Duration bounds:</strong> For duration-based conversions (e.g. power/energy), durations must be between 1 minute and 100 years. Outside that range, the comparison is hidden.</li>
+          <li><strong>Minimum count threshold: 0.1.</strong> If all quantity comparisons in a group yield rawCount {'<'} 0.1, the group is skipped entirely to avoid tiny or unreadable values.</li>
           <li><strong>One card per conversion path.</strong> Each rule (and "direct") produces at most one card showing the best-fit quantity, with a dropdown of alternatives.</li>
-          <li><strong>"Biggest match under" selection.</strong> Among quantities where count {'\u2265'} 1, the algorithm picks the largest (closest to 1 emoji). This gives "1.1 small cities" rather than "1,000 households."</li>
+          <li><strong>"Biggest match under" selection.</strong> For every conversion path, the algorithm picks the entry giving the closest round number. Among quantities where count {'\u2265'} 1, it picks the largest (closest to 1). This gives "1.1 small cities" rather than "1,000 households."</li>
+          <li><strong>Dropdowns show native values.</strong> Each dropdown option shows the entry's own value and unit (e.g. "1.2 kW"), not a value calculated from the input.</li>
           <li><strong>User overrides.</strong> If you select a different quantity from the dropdown, that choice is preserved until you change units.</li>
         </ul>
       </section>

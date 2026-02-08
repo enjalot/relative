@@ -27,6 +27,10 @@ function formatFactorForDisplay(ruleId: string, factor: number): { editValue: nu
   if (ruleId === 'power-energy-duration') {
     return { label: 'duration', editValue: factor, unit: 'hours' }
   }
+  if (ruleId === 'energy-to-time-household') {
+    // factor is s/Wh. consumption_W = 3600/factor. Display as kW.
+    return { label: 'household draw', editValue: 3600 / factor / 1000, unit: 'kW' }
+  }
   return { label: 'factor', editValue: factor, unit: '' }
 }
 
@@ -34,6 +38,7 @@ function editValueToFactor(ruleId: string, editValue: number): number {
   if (ruleId === 'energy-to-money-electricity') return editValue / 1000
   if (ruleId === 'energy-to-distance-tesla') return 1000 / editValue
   if (ruleId === 'energy-to-mass-aluminum') return 1 / (editValue * 1000)
+  if (ruleId === 'energy-to-time-household') return 3600 / (editValue * 1000)
   return editValue
 }
 
@@ -147,16 +152,13 @@ export function ConversionCards({
       {sentences.map((sentence) => {
         const dimEmoji = dimensionEmoji[sentence.outputDimension] || ''
 
-        // Build dropdown options with value hints
+        // Build dropdown options with value hints — always show native value, not computed duration
         const options = sentence.alternatives.map(alt => {
           const altUnit = getUnit(alt.entry.unitId)
-          const hint = alt.durationHours !== undefined
-            ? formatDuration(alt.durationHours)
-            : `${formatNumber(alt.entry.value)} ${altUnit.symbol}`
           return {
             id: alt.entry.id,
             label: alt.entry.name,
-            hint,
+            hint: `${formatNumber(alt.entry.value)} ${altUnit.symbol}`,
             emoji: alt.entry.emoji,
           }
         })

@@ -327,7 +327,9 @@ export function buildAllConversions(
       } else {
         // Filter out very small counts before picking
         const filtered = group.candidates.filter(c => c.rawCount >= MIN_COUNT_THRESHOLD)
-        chosen = pickBestUnder(filtered.length > 0 ? filtered : group.candidates)
+        // If no candidates pass the threshold, skip this group entirely
+        if (filtered.length === 0) continue
+        chosen = pickBestUnder(filtered)
       }
     }
 
@@ -479,6 +481,9 @@ export function formatNumber(n: number): string {
   if (Math.abs(n) >= 10) return n.toFixed(1)
   if (Math.abs(n) >= 1) return n.toFixed(2)
   if (Math.abs(n) >= 0.01) return n.toFixed(3)
+  // Avoid scientific notation for very small values
+  if (n > 0) return '< 0.01'
+  if (n < 0) return '> -0.01'
   return n.toExponential(2)
 }
 

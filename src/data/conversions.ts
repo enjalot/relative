@@ -59,6 +59,19 @@ export const conversionRules: ConversionRule[] = [
     bidirectional: true,
   },
 
+  // === Energy → Time (household consumption duration) ===
+  {
+    id: 'energy-to-time-household',
+    name: 'US household consumption time',
+    fromDimension: 'energy',
+    toDimension: 'time',
+    // At average US household draw of ~1.2 kW (1200 W):
+    // 1 Wh / 1200 W = 1/1200 hours = 3600/1200 seconds = 3 seconds per Wh
+    factor: 3600 / 1200, // 3 seconds per Wh
+    description: 'At US average household draw (~1.2 kW), 1 Wh lasts 3 seconds.',
+    bidirectional: true,
+  },
+
   // === Energy → Money (electricity cost) ===
   {
     id: 'energy-to-money-electricity',
