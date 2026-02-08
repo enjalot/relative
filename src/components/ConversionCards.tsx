@@ -136,6 +136,42 @@ function InlineSelect({ value, options, onChange }: {
   )
 }
 
+/**
+ * Build the factor display element for a conversion step.
+ * Returns the inline-editable factor with reset button, or null if no step.
+ */
+function FactorInline({ step, factorOverrides, onFactorChange }: {
+  step: { rule: { id: string; factor: number } }
+  factorOverrides?: Record<string, number>
+  onFactorChange?: (ruleId: string, newFactor: number | undefined) => void
+}) {
+  const currentFactor = factorOverrides?.[step.rule.id] ?? step.rule.factor
+  const { editValue, unit } = formatFactorForDisplay(step.rule.id, currentFactor)
+  const isOverridden = factorOverrides?.[step.rule.id] !== undefined
+
+  return (
+    <>
+      <TangleNumber
+        value={editValue}
+        onChange={(v) => {
+          const raw = editValueToFactor(step.rule.id, v)
+          onFactorChange?.(step.rule.id, raw)
+        }}
+        suffix={unit}
+      />
+      {isOverridden && onFactorChange && (
+        <button
+          className="card-reset"
+          onClick={() => onFactorChange(step.rule.id, undefined)}
+          title="Reset to default"
+        >
+          reset
+        </button>
+      )}
+    </>
+  )
+}
+
 export function ConversionCards({
   sentences,
   inputNumber,
@@ -163,95 +199,132 @@ export function ConversionCards({
           }
         })
 
-        // Format the count nicely
         const countStr = formatNumber(sentence.count)
         const isDurationBased = sentence.durationHours !== undefined
-
-        // Build the conversion step info if there is one (not for duration-based)
         const step = sentence.steps[0]
-        const stepInfo = (!isDurationBased && step) ? (() => {
-          const currentFactor = factorOverrides?.[step.rule.id] ?? step.rule.factor
-          const { editValue, unit, label } = formatFactorForDisplay(step.rule.id, currentFactor)
-          const isOverridden = factorOverrides?.[step.rule.id] !== undefined
-          return { currentFactor, editValue, unit, label, isOverridden, ruleId: step.rule.id }
-        })() : null
+        const ruleId = step?.rule.id
+        // Is this a reverse conversion? (input dimension matches the rule's toDimension)
+        const isReverse = step ? step.rule.toDimension === inputUnit.dimension : false
+
+        // Shared elements
+        const inputEl = (
+          <TangleNumber value={inputNumber} onChange={onInputNumberChange} suffix={inputUnit.symbol} />
+        )
+        const countEl = <span className="card-count">{countStr}</span>
+        const selectEl = (
+          <InlineSelect
+            value={sentence.outputEntry.id}
+            options={options}
+            onChange={(id) => onEntryChange(sentence.conversionId, id)}
+          />
+        )
+        const factorEl = step ? (
+          <FactorInline step={step} factorOverrides={factorOverrides} onFactorChange={onFactorChange} />
+        ) : null
+
+        // Build the sentence based on conversion type
+        let sentenceContent: React.ReactNode
+
+        if (isDurationBased && inputUnit.dimension === 'energy') {
+          // Energy input, power output via duration
+          sentenceContent = (
+            <p className="card-sentence">
+              {inputEl}
+              {' is the equivalent of running '}
+              {selectEl}
+              {' for '}
+              <span className="card-count">{formatDuration(sentence.durationHours!)}</span>
+            </p>
+          )
+        } else if (isDurationBased && inputUnit.dimension === 'power') {
+          // Power input, energy output via duration
+          sentenceContent = (
+            <p className="card-sentence">
+              {inputEl}
+              {' running for '}
+              <span className="card-count">{formatDuration(sentence.durationHours!)}</span>
+              {' is the equivalent of '}
+              {selectEl}
+            </p>
+          )
+        } else if (ruleId === 'energy-to-money-electricity' && !isReverse) {
+          // Energy → Money
+          sentenceContent = (
+            <p className="card-sentence">
+              {'at '}{factorEl}{', '}{inputEl}{' costs the equivalent of '}{countEl}{' '}{selectEl}
+            </p>
+          )
+        } else if (ruleId === 'energy-to-money-electricity' && isReverse) {
+          // Money → Energy
+          sentenceContent = (
+            <p className="card-sentence">
+              {'at '}{factorEl}{', '}{inputEl}{' buys enough electricity for '}{countEl}{' '}{selectEl}
+            </p>
+          )
+        } else if (ruleId === 'energy-to-distance-tesla' && !isReverse) {
+          // Energy → Distance
+          sentenceContent = (
+            <p className="card-sentence">
+              {'a Tesla Model 3 at '}{factorEl}{' could drive '}{countEl}{' '}{selectEl}{' on '}{inputEl}
+            </p>
+          )
+        } else if (ruleId === 'energy-to-distance-tesla' && isReverse) {
+          // Distance → Energy
+          sentenceContent = (
+            <p className="card-sentence">
+              {'driving '}{inputEl}{' in a Tesla Model 3 at '}{factorEl}{' uses '}{countEl}{' '}{selectEl}
+            </p>
+          )
+        } else if (ruleId === 'energy-to-mass-aluminum' && !isReverse) {
+          // Energy → Mass
+          sentenceContent = (
+            <p className="card-sentence">
+              {inputEl}{' could smelt '}{countEl}{' '}{selectEl}{' of aluminum at '}{factorEl}
+            </p>
+          )
+        } else if (ruleId === 'energy-to-mass-aluminum' && isReverse) {
+          // Mass → Energy
+          sentenceContent = (
+            <p className="card-sentence">
+              {'smelting '}{inputEl}{' of aluminum at '}{factorEl}{' requires '}{countEl}{' '}{selectEl}
+            </p>
+          )
+        } else if (ruleId === 'energy-to-time-household' && !isReverse) {
+          // Energy → Time
+          sentenceContent = (
+            <p className="card-sentence">
+              {'at '}{factorEl}{' average household draw, '}{inputEl}{' could power a home for '}{countEl}{' '}{selectEl}
+            </p>
+          )
+        } else if (ruleId === 'energy-to-time-household' && isReverse) {
+          // Time → Energy
+          sentenceContent = (
+            <p className="card-sentence">
+              {'at '}{factorEl}{' average household draw, '}{inputEl}{' of electricity is '}{countEl}{' '}{selectEl}
+            </p>
+          )
+        } else if (step && factorEl) {
+          // Generic hop with factor (fallback)
+          sentenceContent = (
+            <p className="card-sentence">
+              {inputEl}{' is '}{countEl}{' '}{selectEl}{' (at '}{factorEl}{')'}
+            </p>
+          )
+        } else {
+          // Direct comparison (same dimension)
+          sentenceContent = (
+            <p className="card-sentence">
+              {inputEl}{' is '}{countEl}{' '}{selectEl}
+            </p>
+          )
+        }
 
         return (
           <div className="conversion-card" key={sentence.conversionId}>
             <div className="card-dimension-tag">
               {dimEmoji} {sentence.conversionName}
             </div>
-            {isDurationBased && inputUnit.dimension === 'energy' ? (
-              <p className="card-sentence">
-                <TangleNumber
-                  value={inputNumber}
-                  onChange={onInputNumberChange}
-                  suffix={inputUnit.symbol}
-                />
-                {' is the equivalent of running '}
-                <InlineSelect
-                  value={sentence.outputEntry.id}
-                  options={options}
-                  onChange={(id) => onEntryChange(sentence.conversionId, id)}
-                />
-                {' for '}
-                <span className="card-count">{formatDuration(sentence.durationHours!)}</span>
-              </p>
-            ) : isDurationBased && inputUnit.dimension === 'power' ? (
-              <p className="card-sentence">
-                <TangleNumber
-                  value={inputNumber}
-                  onChange={onInputNumberChange}
-                  suffix={inputUnit.symbol}
-                />
-                {' running for '}
-                <span className="card-count">{formatDuration(sentence.durationHours!)}</span>
-                {' is the equivalent of '}
-                <InlineSelect
-                  value={sentence.outputEntry.id}
-                  options={options}
-                  onChange={(id) => onEntryChange(sentence.conversionId, id)}
-                />
-              </p>
-            ) : (
-              <p className="card-sentence">
-                <TangleNumber
-                  value={inputNumber}
-                  onChange={onInputNumberChange}
-                  suffix={inputUnit.symbol}
-                />
-                {' is '}
-                <span className="card-count">{countStr}</span>
-                {' '}
-                <InlineSelect
-                  value={sentence.outputEntry.id}
-                  options={options}
-                  onChange={(id) => onEntryChange(sentence.conversionId, id)}
-                />
-              </p>
-            )}
-            {stepInfo && onFactorChange && (
-              <p className="card-step">
-                assuming{' '}
-                <TangleNumber
-                  value={stepInfo.editValue}
-                  onChange={(v) => {
-                    const raw = editValueToFactor(stepInfo.ruleId, v)
-                    onFactorChange(stepInfo.ruleId, raw)
-                  }}
-                  suffix={stepInfo.unit}
-                />
-                {stepInfo.isOverridden && (
-                  <button
-                    className="card-reset"
-                    onClick={() => onFactorChange(stepInfo.ruleId, undefined)}
-                    title="Reset to default"
-                  >
-                    reset
-                  </button>
-                )}
-              </p>
-            )}
+            {sentenceContent}
           </div>
         )
       })}
