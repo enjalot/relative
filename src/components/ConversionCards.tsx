@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ConversionSentence } from '../engine/converter'
-import { formatNumber } from '../engine/converter'
+import { formatNumber, formatDuration } from '../engine/converter'
 import { getUnit } from '../data/units'
 
 interface ConversionCardsProps {
@@ -24,7 +24,7 @@ function formatFactorForDisplay(ruleId: string, factor: number): { editValue: nu
   if (ruleId === 'energy-to-mass-aluminum') {
     return { label: 'energy per kg', editValue: 1 / (factor * 1000), unit: 'kWh/kg' }
   }
-  if (ruleId.startsWith('power-to-energy')) {
+  if (ruleId === 'power-energy-duration') {
     return { label: 'duration', editValue: factor, unit: 'hours' }
   }
   return { label: 'factor', editValue: factor, unit: '' }
@@ -150,20 +150,24 @@ export function ConversionCards({
         // Build dropdown options with value hints
         const options = sentence.alternatives.map(alt => {
           const altUnit = getUnit(alt.entry.unitId)
+          const hint = alt.durationHours !== undefined
+            ? formatDuration(alt.durationHours)
+            : `${formatNumber(alt.entry.value)} ${altUnit.symbol}`
           return {
             id: alt.entry.id,
             label: alt.entry.name,
-            hint: `${formatNumber(alt.entry.value)} ${altUnit.symbol}`,
+            hint,
             emoji: alt.entry.emoji,
           }
         })
 
         // Format the count nicely
         const countStr = formatNumber(sentence.count)
+        const isDurationBased = sentence.durationHours !== undefined
 
-        // Build the conversion step info if there is one
+        // Build the conversion step info if there is one (not for duration-based)
         const step = sentence.steps[0]
-        const stepInfo = step ? (() => {
+        const stepInfo = (!isDurationBased && step) ? (() => {
           const currentFactor = factorOverrides?.[step.rule.id] ?? step.rule.factor
           const { editValue, unit, label } = formatFactorForDisplay(step.rule.id, currentFactor)
           const isOverridden = factorOverrides?.[step.rule.id] !== undefined
@@ -175,21 +179,55 @@ export function ConversionCards({
             <div className="card-dimension-tag">
               {dimEmoji} {sentence.conversionName}
             </div>
-            <p className="card-sentence">
-              <TangleNumber
-                value={inputNumber}
-                onChange={onInputNumberChange}
-                suffix={inputUnit.symbol}
-              />
-              {' is '}
-              <span className="card-count">{countStr}</span>
-              {' '}
-              <InlineSelect
-                value={sentence.outputEntry.id}
-                options={options}
-                onChange={(id) => onEntryChange(sentence.conversionId, id)}
-              />
-            </p>
+            {isDurationBased && inputUnit.dimension === 'energy' ? (
+              <p className="card-sentence">
+                <TangleNumber
+                  value={inputNumber}
+                  onChange={onInputNumberChange}
+                  suffix={inputUnit.symbol}
+                />
+                {' is the equivalent of running '}
+                <InlineSelect
+                  value={sentence.outputEntry.id}
+                  options={options}
+                  onChange={(id) => onEntryChange(sentence.conversionId, id)}
+                />
+                {' for '}
+                <span className="card-count">{formatDuration(sentence.durationHours!)}</span>
+              </p>
+            ) : isDurationBased && inputUnit.dimension === 'power' ? (
+              <p className="card-sentence">
+                <TangleNumber
+                  value={inputNumber}
+                  onChange={onInputNumberChange}
+                  suffix={inputUnit.symbol}
+                />
+                {' running for '}
+                <span className="card-count">{formatDuration(sentence.durationHours!)}</span>
+                {' is the equivalent of '}
+                <InlineSelect
+                  value={sentence.outputEntry.id}
+                  options={options}
+                  onChange={(id) => onEntryChange(sentence.conversionId, id)}
+                />
+              </p>
+            ) : (
+              <p className="card-sentence">
+                <TangleNumber
+                  value={inputNumber}
+                  onChange={onInputNumberChange}
+                  suffix={inputUnit.symbol}
+                />
+                {' is '}
+                <span className="card-count">{countStr}</span>
+                {' '}
+                <InlineSelect
+                  value={sentence.outputEntry.id}
+                  options={options}
+                  onChange={(id) => onEntryChange(sentence.conversionId, id)}
+                />
+              </p>
+            )}
             {stepInfo && onFactorChange && (
               <p className="card-step">
                 assuming{' '}

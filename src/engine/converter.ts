@@ -210,14 +210,57 @@ export interface ConversionSentence {
   /** Conversion steps taken */
   steps: ConversionStep[]
   /** All candidate entries for this conversion path (for the dropdown) */
-  alternatives: Array<{ entry: QuantityEntry; count: number }>
+  alternatives: Array<{ entry: QuantityEntry; count: number; durationHours?: number }>
   /** The converted base value in the output dimension */
   outputBaseValue: number
+  /** For power↔energy conversions: how long in hours to run/consume */
+  durationHours?: number
 }
+
+/**
+ * Compute duration in hours for a power↔energy conversion.
+ * @param inputBaseValue - Input in base units (W or Wh)
+ * @param inputDimension - 'power' or 'energy'
+ * @param entryBaseValue - Output entry in base units (W or Wh)
+ */
+function computeDurationHours(
+  inputBaseValue: number,
+  inputDimension: string,
+  entryBaseValue: number,
+): number {
+  if (inputDimension === 'energy') {
+    // Energy input, power output: duration = energy(Wh) / power(W)
+    return inputBaseValue / entryBaseValue
+  } else {
+    // Power input, energy output: duration = energy(Wh) / power(W)
+    return entryBaseValue / inputBaseValue
+  }
+}
+
+/**
+ * Score a duration for how "readable" it is.
+ * Prefers durations that produce nice numbers in natural time units.
+ */
+function scoreDuration(hours: number): number {
+  if (hours <= 0) return -Infinity
+  // Sweet spot: 1–100 hours
+  const logHours = Math.log10(hours)
+  const distance = Math.abs(logHours - 1) // distance from 10 hours
+  let score = 5 - distance * 1.5
+  // Penalize very small durations (< 1 minute)
+  if (hours < 1 / 60) score -= 5
+  // Penalize very large durations (> 100 years)
+  if (hours > 876600) score -= 5
+  return score
+}
+
+/** Minimum count threshold: skip conversions needing scientific notation */
+const MIN_COUNT_THRESHOLD = 0.1
 
 /**
  * Build one conversion sentence per conversion type.
  * Uses the "biggest match under" algorithm for selection.
+ * Power↔energy conversions use duration-based sentences instead of count.
  */
 export function buildAllConversions(
   inputNumber: number,
@@ -258,6 +301,7 @@ export function buildAllConversions(
 
   for (const convId of sortedKeys) {
     const group = groups.get(convId)!
+    const isDurationBased = convId === 'power-energy-duration'
 
     // Check if user has overridden the entry for this conversion
     const overrideEntryId = entryOverrides?.[convId]
@@ -268,33 +312,83 @@ export function buildAllConversions(
     }
 
     if (!chosen) {
-      chosen = pickBestUnder(group.candidates)
+      if (isDurationBased) {
+        // Pick best by duration quality
+        let bestScore = -Infinity
+        for (const c of group.candidates) {
+          const entryBase = toBaseValue(c.entry)
+          const duration = computeDurationHours(inputBaseValue, inputUnit.dimension, entryBase)
+          const score = scoreDuration(duration)
+          if (score > bestScore) {
+            bestScore = score
+            chosen = c
+          }
+        }
+      } else {
+        // Filter out very small counts before picking
+        const filtered = group.candidates.filter(c => c.rawCount >= MIN_COUNT_THRESHOLD)
+        chosen = pickBestUnder(filtered.length > 0 ? filtered : group.candidates)
+      }
     }
 
     if (!chosen) continue
 
     const outputUnit = getUnit(chosen.entry.unitId)
 
-    // Build alternatives list with counts, sorted by value descending
-    const alternatives = group.candidates
-      .map(c => ({ entry: c.entry, count: c.rawCount }))
-      .sort((a, b) => {
-        const aBase = toBaseValue(a.entry)
-        const bBase = toBaseValue(b.entry)
-        return bBase - aBase
-      })
+    if (isDurationBased) {
+      // Duration-based: compute duration for chosen and all alternatives
+      const chosenBase = toBaseValue(chosen.entry)
+      const chosenDuration = computeDurationHours(inputBaseValue, inputUnit.dimension, chosenBase)
 
-    sentences.push({
-      conversionId: convId,
-      conversionName: group.name,
-      outputDimension: group.dimension,
-      outputEntry: chosen.entry,
-      count: chosen.rawCount,
-      outputUnit,
-      steps: chosen.steps,
-      alternatives,
-      outputBaseValue: chosen.outputBaseValue,
-    })
+      const alternatives = group.candidates
+        .map(c => {
+          const entryBase = toBaseValue(c.entry)
+          const duration = computeDurationHours(inputBaseValue, inputUnit.dimension, entryBase)
+          return { entry: c.entry, count: c.rawCount, durationHours: duration }
+        })
+        // Filter out very small or very large durations
+        .filter(a => a.durationHours >= 1 / 60 && a.durationHours <= 876600)
+        .sort((a, b) => {
+          const aBase = toBaseValue(a.entry)
+          const bBase = toBaseValue(b.entry)
+          return bBase - aBase
+        })
+
+      sentences.push({
+        conversionId: convId,
+        conversionName: group.name,
+        outputDimension: group.dimension,
+        outputEntry: chosen.entry,
+        count: chosen.rawCount,
+        outputUnit,
+        steps: chosen.steps,
+        alternatives,
+        outputBaseValue: chosen.outputBaseValue,
+        durationHours: chosenDuration,
+      })
+    } else {
+      // Standard count-based conversion
+      const alternatives = group.candidates
+        .filter(c => c.rawCount >= MIN_COUNT_THRESHOLD)
+        .map(c => ({ entry: c.entry, count: c.rawCount }))
+        .sort((a, b) => {
+          const aBase = toBaseValue(a.entry)
+          const bBase = toBaseValue(b.entry)
+          return bBase - aBase
+        })
+
+      sentences.push({
+        conversionId: convId,
+        conversionName: group.name,
+        outputDimension: group.dimension,
+        outputEntry: chosen.entry,
+        count: chosen.rawCount,
+        outputUnit,
+        steps: chosen.steps,
+        alternatives,
+        outputBaseValue: chosen.outputBaseValue,
+      })
+    }
   }
 
   return sentences
@@ -343,6 +437,37 @@ function chooseBestUnit(baseValue: number, dimension: string): Unit {
     if (display >= 1) best = u
   }
   return best
+}
+
+/**
+ * Format a duration in hours into a natural-language string.
+ * Picks the most natural unit (minutes, hours, days, months, years).
+ */
+export function formatDuration(hours: number): string {
+  if (hours < 1 / 60) {
+    // Less than 1 minute: show seconds
+    const seconds = hours * 3600
+    return `${formatNumber(seconds)} seconds`
+  }
+  if (hours < 1) {
+    const minutes = hours * 60
+    return `${formatNumber(minutes)} minutes`
+  }
+  if (hours < 48) {
+    return `${formatNumber(hours)} hours`
+  }
+  if (hours < 720) {
+    // Up to ~30 days
+    const days = hours / 24
+    return `${formatNumber(days)} days`
+  }
+  if (hours < 8766) {
+    // Up to ~1 year
+    const months = hours / 730
+    return `${formatNumber(months)} months`
+  }
+  const years = hours / 8766
+  return `${formatNumber(years)} years`
 }
 
 /** Format a number with appropriate precision */

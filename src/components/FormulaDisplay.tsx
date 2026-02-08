@@ -31,14 +31,8 @@ function formatFactorLabel(ruleId: string, factor: number): { label: string; edi
     // factor is kg/Wh, display as kWh/kg
     return { label: 'Energy per kg', editValue: 1 / (factor * 1000), unit: 'kWh/kg' }
   }
-  // For power-to-energy rules, show the time multiplier
-  if (ruleId === 'power-to-energy-per-hour') {
-    return { label: 'Hours', editValue: factor, unit: 'hours' }
-  }
-  if (ruleId === 'power-to-energy-per-day') {
-    return { label: 'Hours', editValue: factor, unit: 'hours' }
-  }
-  if (ruleId === 'power-to-energy-per-year') {
+  // For power↔energy duration rule
+  if (ruleId === 'power-energy-duration') {
     return { label: 'Hours', editValue: factor, unit: 'hours' }
   }
   return { label: 'Conversion factor', editValue: factor, unit: '' }
