@@ -24,30 +24,12 @@ export const conversionRules: ConversionRule[] = [
   // We handle power↔energy specially: user picks a time duration.
   // For the default, we use "per hour" to make power→energy easy.
   {
-    id: 'power-to-energy-per-hour',
-    name: 'Power to energy (per hour)',
+    id: 'power-energy-duration',
+    name: 'Running time',
     fromDimension: 'power',
     toDimension: 'energy',
-    factor: 1, // 1 watt for 1 hour = 1 watt-hour
-    description: 'Running at X watts for 1 hour uses X watt-hours.',
-    bidirectional: true,
-  },
-  {
-    id: 'power-to-energy-per-day',
-    name: 'Power to energy (per day)',
-    fromDimension: 'power',
-    toDimension: 'energy',
-    factor: 24, // 1 watt for 24 hours = 24 watt-hours
-    description: 'Running at X watts for 1 day uses 24·X watt-hours.',
-    bidirectional: true,
-  },
-  {
-    id: 'power-to-energy-per-year',
-    name: 'Power to energy (per year)',
-    fromDimension: 'power',
-    toDimension: 'energy',
-    factor: 8766, // 1 watt for 1 year ≈ 8,766 watt-hours (365.25 days)
-    description: 'Running at X watts for 1 year uses ~8,766·X watt-hours.',
+    factor: 1, // 1 watt for 1 hour = 1 watt-hour (base relation)
+    description: 'Energy = Power × Time. Duration is computed per appliance.',
     bidirectional: true,
   },
 
