@@ -2,11 +2,12 @@ import { useState, useMemo, useCallback } from 'react'
 import { InputPanel } from './components/InputPanel'
 import { ConversionCards } from './components/ConversionCards'
 import { ConversionExplorer } from './components/ConversionExplorer'
+import { About } from './components/AboutDiagrams'
 import { buildAllConversions } from './engine/converter'
 import { useUrlState } from './hooks/useUrlState'
 import './App.css'
 
-type Tab = 'converter' | 'explorer'
+type Tab = 'converter' | 'explorer' | 'about'
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('converter')
@@ -52,6 +53,12 @@ function App() {
         >
           Explore quantities
         </button>
+        <button
+          className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
+          onClick={() => setActiveTab('about')}
+        >
+          About
+        </button>
       </nav>
 
       <main className="app-main">
@@ -88,6 +95,8 @@ function App() {
         )}
 
         {activeTab === 'explorer' && <ConversionExplorer />}
+
+        {activeTab === 'about' && <About />}
       </main>
 
       <footer className="app-footer">
