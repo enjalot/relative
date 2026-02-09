@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ConversionSentence } from '../engine/converter'
-import { formatNumber, formatDuration } from '../engine/converter'
+import { formatNumber, formatDuration, chooseBestUnit } from '../engine/converter'
 import { getUnit } from '../data/units'
 
 interface ConversionCardsProps {
@@ -40,6 +40,17 @@ function editValueToFactor(ruleId: string, editValue: number): number {
   if (ruleId === 'energy-to-mass-aluminum') return 1 / (editValue * 1000)
   if (ruleId === 'energy-to-time-household') return 3600 / (editValue * 1000)
   return editValue
+}
+
+/** Format a total base value in the best display unit for a dimension */
+function formatTotal(baseValue: number, dimension: string): string {
+  if (dimension === 'time') {
+    // Time base is seconds; formatDuration expects hours
+    return formatDuration(baseValue / 3600)
+  }
+  const unit = chooseBestUnit(baseValue, dimension)
+  const displayValue = baseValue / unit.toBase
+  return `${formatNumber(displayValue)} ${unit.symbol}`
 }
 
 /** Dimension emoji indicators */
@@ -225,6 +236,11 @@ export function ConversionCards({
         // Build the sentence based on conversion type
         let sentenceContent: React.ReactNode
 
+        // For non-direct, non-duration conversions, show computed total first
+        const totalEl = step && !isDurationBased ? (
+          <span className="card-count">{formatTotal(sentence.outputBaseValue, sentence.outputDimension)}</span>
+        ) : null
+
         if (isDurationBased && inputUnit.dimension === 'energy') {
           // Energy input, power output via duration
           sentenceContent = (
@@ -248,66 +264,66 @@ export function ConversionCards({
             </p>
           )
         } else if (ruleId === 'energy-to-money-electricity' && !isReverse) {
-          // Energy → Money
+          // Energy → Money: show total cost first, then equivalent
           sentenceContent = (
             <p className="card-sentence">
-              {'at '}{factorEl}{', '}{inputEl}{' costs the equivalent of '}{countEl}{' '}{selectEl}
+              {'at '}{factorEl}{', '}{inputEl}{' costs '}{totalEl}{', or the equivalent of '}{countEl}{' '}{selectEl}
             </p>
           )
         } else if (ruleId === 'energy-to-money-electricity' && isReverse) {
-          // Money → Energy
+          // Money → Energy: show total energy first, then equivalent
           sentenceContent = (
             <p className="card-sentence">
-              {'at '}{factorEl}{', '}{inputEl}{' buys enough electricity for '}{countEl}{' '}{selectEl}
+              {'at '}{factorEl}{', '}{inputEl}{' buys '}{totalEl}{' of electricity, or '}{countEl}{' '}{selectEl}
             </p>
           )
         } else if (ruleId === 'energy-to-distance-tesla' && !isReverse) {
-          // Energy → Distance
+          // Energy → Distance: show total distance first, then equivalent
           sentenceContent = (
             <p className="card-sentence">
-              {'a Tesla Model 3 at '}{factorEl}{' could drive '}{countEl}{' '}{selectEl}{' on '}{inputEl}
+              {'a Tesla Model 3 at '}{factorEl}{' on '}{inputEl}{' could drive '}{totalEl}{', or '}{countEl}{' '}{selectEl}
             </p>
           )
         } else if (ruleId === 'energy-to-distance-tesla' && isReverse) {
-          // Distance → Energy
+          // Distance → Energy: show total energy first, then equivalent
           sentenceContent = (
             <p className="card-sentence">
-              {'driving '}{inputEl}{' in a Tesla Model 3 at '}{factorEl}{' uses '}{countEl}{' '}{selectEl}
+              {'driving '}{inputEl}{' in a Tesla Model 3 at '}{factorEl}{' uses '}{totalEl}{', or '}{countEl}{' '}{selectEl}
             </p>
           )
         } else if (ruleId === 'energy-to-mass-aluminum' && !isReverse) {
-          // Energy → Mass
+          // Energy → Mass: show total mass first, then equivalent
           sentenceContent = (
             <p className="card-sentence">
-              {inputEl}{' could smelt '}{countEl}{' '}{selectEl}{' of aluminum at '}{factorEl}
+              {inputEl}{' could smelt '}{totalEl}{' of aluminum at '}{factorEl}{', or '}{countEl}{' '}{selectEl}
             </p>
           )
         } else if (ruleId === 'energy-to-mass-aluminum' && isReverse) {
-          // Mass → Energy
+          // Mass → Energy: show total energy first, then equivalent
           sentenceContent = (
             <p className="card-sentence">
-              {'smelting '}{inputEl}{' of aluminum at '}{factorEl}{' requires '}{countEl}{' '}{selectEl}
+              {'smelting '}{inputEl}{' of aluminum at '}{factorEl}{' requires '}{totalEl}{', or '}{countEl}{' '}{selectEl}
             </p>
           )
         } else if (ruleId === 'energy-to-time-household' && !isReverse) {
-          // Energy → Time
+          // Energy → Time: show total time first, then equivalent
           sentenceContent = (
             <p className="card-sentence">
-              {'at '}{factorEl}{' average household draw, '}{inputEl}{' could power a home for '}{countEl}{' '}{selectEl}
+              {'at '}{factorEl}{' average household draw, '}{inputEl}{' could power a home for '}{totalEl}{', or '}{countEl}{' '}{selectEl}
             </p>
           )
         } else if (ruleId === 'energy-to-time-household' && isReverse) {
-          // Time → Energy
+          // Time → Energy: show total energy first, then equivalent
           sentenceContent = (
             <p className="card-sentence">
-              {'at '}{factorEl}{' average household draw, '}{inputEl}{' of electricity is '}{countEl}{' '}{selectEl}
+              {'at '}{factorEl}{' average household draw, '}{inputEl}{' of electricity is '}{totalEl}{', or '}{countEl}{' '}{selectEl}
             </p>
           )
         } else if (step && factorEl) {
           // Generic hop with factor (fallback)
           sentenceContent = (
             <p className="card-sentence">
-              {inputEl}{' is '}{countEl}{' '}{selectEl}{' (at '}{factorEl}{')'}
+              {inputEl}{' is '}{totalEl}{', or '}{countEl}{' '}{selectEl}{' (at '}{factorEl}{')'}
             </p>
           )
         } else {

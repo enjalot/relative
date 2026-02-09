@@ -447,7 +447,7 @@ export function About() {
                 <td><strong>{rule.name}</strong></td>
                 <td>{rule.fromDimension}</td>
                 <td>{rule.toDimension}</td>
-                <td><code>{rule.factor}</code></td>
+                <td><code>{Number(rule.factor.toPrecision(4))}</code></td>
                 <td>{rule.description}</td>
               </tr>
             ))}

@@ -303,6 +303,9 @@ export function buildAllConversions(
     const group = groups.get(convId)!
     const isDurationBased = group.candidates[0]?.steps[0]?.rule.durationBased === true
 
+    // Skip direct power comparisons — only show running time for power input
+    if (convId === 'direct' && inputUnit.dimension === 'power') continue
+
     // Check if user has overridden the entry for this conversion
     const overrideEntryId = entryOverrides?.[convId]
     let chosen: Candidate | null = null
@@ -348,8 +351,8 @@ export function buildAllConversions(
           const duration = computeDurationHours(inputBaseValue, inputUnit.dimension, entryBase)
           return { entry: c.entry, count: c.rawCount, durationHours: duration }
         })
-        // Filter out very small or very large durations
-        .filter(a => a.durationHours >= 1 / 60 && a.durationHours <= 876600)
+        // No filtering here — allow all options in the dropdown.
+        // Duration limits are only applied for auto-selection via scoreDuration().
         .sort((a, b) => {
           const aBase = toBaseValue(a.entry)
           const bBase = toBaseValue(b.entry)
@@ -369,9 +372,9 @@ export function buildAllConversions(
         durationHours: chosenDuration,
       })
     } else {
-      // Standard count-based conversion
+      // Standard count-based conversion — no filtering for alternatives dropdown.
+      // MIN_COUNT_THRESHOLD is only applied for auto-selection above.
       const alternatives = group.candidates
-        .filter(c => c.rawCount >= MIN_COUNT_THRESHOLD)
         .map(c => ({ entry: c.entry, count: c.rawCount }))
         .sort((a, b) => {
           const aBase = toBaseValue(a.entry)
@@ -430,7 +433,7 @@ function formatEmojiLabel(entry: QuantityEntry, scale: number): string {
  * Choose the best unit for displaying a value in base units.
  * Picks the unit where the display value is between 0.1 and 9999.
  */
-function chooseBestUnit(baseValue: number, dimension: string): Unit {
+export function chooseBestUnit(baseValue: number, dimension: string): Unit {
   const dimUnits = units.filter(u => u.dimension === dimension).sort((a, b) => a.toBase - b.toBase)
   // Find the largest unit where the value is >= 1
   let best = dimUnits[0]
